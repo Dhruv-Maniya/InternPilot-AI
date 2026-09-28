@@ -55,3 +55,11 @@ All notable changes to InternPilot AI will be documented in this file.
 - Enabled Gemini to invoke SerpApi for internship search requests.
 - Added structured search result handling for agent responses.
 - Tested agent tool invocation with real SerpApi internship results.
+
+#### Student Profile Matching API
+- Added StudentProfile schema for student information.
+- Implemented keyword-based internship matching.
+- Added match percentages and matched/missing skill analysis.
+- Added POST /api/internships/match endpoint.
+- Tested profile-based internship recommendations using SerpApi.
+
