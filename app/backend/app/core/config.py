@@ -10,8 +10,11 @@ class Settings(BaseSettings):
     # SerpApi
     serpapi_api_key: str = ""
 
-    # AI
-    ai_api_key: str = ""
+    # OpenAI
+    openai_api_key: str = ""
+
+    # Gemini
+    gemini_api_key: str = ""
 
     # Supabase
     supabase_url: str = ""
