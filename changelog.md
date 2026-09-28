@@ -49,3 +49,9 @@ All notable changes to InternPilot AI will be documented in this file.
 * Disabled OpenAI tracing for the Gemini integration.
 * Successfully tested natural-language internship guidance using Gemini.
 * Restored compatible OpenAI SDK dependencies after removing LiteLLM.
+
+#### SerpApi Agent Tool
+- Added a SerpApi search function tool to the Internship Discovery Agent.
+- Enabled Gemini to invoke SerpApi for internship search requests.
+- Added structured search result handling for agent responses.
+- Tested agent tool invocation with real SerpApi internship results.
