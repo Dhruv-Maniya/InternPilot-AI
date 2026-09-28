@@ -63,3 +63,100 @@ All notable changes to InternPilot AI will be documented in this file.
 - Added POST /api/internships/match endpoint.
 - Tested profile-based internship recommendations using SerpApi.
 
+
+## [Unreleased] - Internship Recommendation Ranking
+
+### Added
+- Eligibility-based internship ranking.
+- Recommendation priority for entry-level, unclear, and experience-required listings.
+- Skill match percentage as a secondary sorting criterion.
+
+### Maintained
+- Existing SerpApi integration.
+- Existing student skill matching and eligibility checker.
+
+
+## [Unreleased] - Internship Filtering
+
+### Added
+- Internship-specific keywords in SerpApi searches.
+- Filtering for internship, trainee, apprentice, and co-op listings.
+- Exclusion of clearly senior and unrelated job titles.
+
+### Maintained
+- Existing SerpApi client and configuration.
+- Internship matching, eligibility checking, and ranking.s
+
+### Fixed
+- Corrected eligibility detection for fresher-friendly internships.
+- Prioritized explicit no-experience and fresher indicators.
+- Improved skill matching using aliases and word boundaries.
+- Added safe handling for empty student skill lists.
+- Preserved internship recommendation priority and sorting.
+
+### In Progress
+- Separating required, preferred, and learning skills in internship matching.
+- Improving match percentage accuracy.
+- Adding safer handling for internship descriptions with unclear requirements.
+
+### Fixed
+- Separated required, preferred, and learning skills.
+- Updated internship matching to calculate percentage using extracted required skills.
+- Added review handling for descriptions without clear requirements.
+- Preserved existing eligibility and recommendation sorting.
+
+
+## Fixed — Internship Skill Matching
+
+- Corrected matching of student skills against job-required skills.
+- Fixed the match percentage denominator.
+- Matched and missing skills now use the job's required skill list.
+- Preserved the existing API response structure and recommendation sorting.
+
+
+## Improved — Internship Skill Extraction
+
+- Added support for inline skill-section headings.
+- Improved handling of bullet points and multiline descriptions.
+- Distinguished required, preferred, and learning skills.
+- Corrected requirements_found to track required-section headings.
+
+## Internship Matching API — Completed
+
+- Fixed undefined eligibility and recommendation_priority variables.
+- Successfully tested POST /api/internships/match in Swagger.
+- Confirmed HTTP 200 OK.
+- Verified internship results include skill matching,
+  eligibility status, and recommendation priority.
+
+### Internship Location Filtering
+- Added strict location filtering for city-specific internship searches.
+- Verified Mumbai filtering through POST /api/internships/match.
+- Confirmed HTTP 200 OK with 6 matching location results.
+- Confirmed unrelated locations were excluded from the response.
+
+### India-Wide Internship Search
+- Verified India-wide search through POST /api/internships/match.
+- Confirmed HTTP 200 OK with 10 results.
+- Confirmed nationwide and remote listings are not excluded by city filtering.
+- Verified skill-match percentages against extracted requirements.
+
+### Multi-Skill Matching Test
+- Verified matching with multiple student skills.
+- Confirmed matched and missing skills are returned correctly.
+- Verified match percentages against extracted requirements.
+- Confirmed HTTP 200 OK with 10 internship results.
+
+### Internship Sorting and Recommendation Priority
+- Verified internship sorting through POST /api/internships/match.
+- Confirmed internships are grouped by recommendation priority.
+- Confirmed numerical match percentages are sorted in descending order within priority groups.
+- Confirmed listings without extracted requirements appear after scored listings within the same priority group.
+- Verified HTTP 200 OK with 10 internship results.
+
+### SerpApi Integration and Eligibility Verification
+- Fixed SerpApi client initialization for the installed serpapi package.
+- Verified live Google Jobs search through POST /api/internships/match.
+- Confirmed HTTP 200 OK with 10 internship results.
+- Verified eligibility classification for entry-level, review-required, and experience-required cases.
+- Confirmed skill matching, match percentages, and recommendation priority in the API response.

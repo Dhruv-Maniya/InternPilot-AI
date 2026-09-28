@@ -27,3 +27,13 @@ class StudentProfile(BaseModel):
     )
 
     preferred_location: str = "India"
+
+class SkillAnalysis(BaseModel):
+    required_skills: list[str] = Field(default_factory=list)
+    matched_required_skills: list[str] = Field(default_factory=list)
+    missing_required_skills: list[str] = Field(default_factory=list)
+
+    preferred_skills: list[str] = Field(default_factory=list)
+    skills_to_learn: list[str] = Field(default_factory=list)
+
+    match_percentage: float = 0.0
