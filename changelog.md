@@ -160,3 +160,18 @@ All notable changes to InternPilot AI will be documented in this file.
 - Confirmed HTTP 200 OK with 10 internship results.
 - Verified eligibility classification for entry-level, review-required, and experience-required cases.
 - Confirmed skill matching, match percentages, and recommendation priority in the API response.
+
+
+## Unreleased
+
+### Added
+- Added automated matching tests for skill matching and internship eligibility.
+- Added duplicate internship filtering based on company name and job title.
+
+### Fixed
+- Restored the SerpApi internship search method and corrected class indentation.
+- Preserved internship and location filtering in the SerpApi service.
+
+### Testing
+- All 9 matching tests passed using pytest.
+- Verified the internship matching API returns HTTP 200 OK.
