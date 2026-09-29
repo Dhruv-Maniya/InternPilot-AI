@@ -224,3 +224,21 @@ All notable changes to InternPilot AI will be documented in this file.
 ### Testing
 - Focused learning resource tests: 5 passed.
 - Full test suite: 36 passed.
+
+## 2026-09-29
+
+### Added
+- Added Aptitude Practice backend functionality.
+- Added aptitude question schemas for questions, test requests, and test results.
+- Added a curated aptitude question bank for Quantitative Aptitude, Logical Reasoning, Verbal Ability, and Data Interpretation.
+- Added category and difficulty-based question filtering.
+- Added aptitude answer evaluation and score calculation.
+- Added accuracy calculation and basic weak-area detection.
+- Added `POST /api/aptitude/questions` endpoint.
+- Added `POST /api/aptitude/submit` endpoint.
+- Added automated tests for aptitude question retrieval and result calculation.
+
+### Testing
+- Focused aptitude tests: 6 passed.
+- Full backend test suite: 42 passed.
+- Swagger API testing completed for question retrieval and test submission.

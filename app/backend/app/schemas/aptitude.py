@@ -1,0 +1,52 @@
+from pydantic import BaseModel, Field
+
+
+class AptitudeQuestion(BaseModel):
+    id: int
+    category: str
+    difficulty: str
+    question: str
+    options: list[str]
+    correct_answer: str
+
+
+class AptitudeQuestionRequest(BaseModel):
+    category: str = Field(
+        ...,
+        description="Aptitude category"
+    )
+
+    difficulty: str = Field(
+        ...,
+        description="Difficulty level"
+    )
+
+
+class AptitudeTestRequest(BaseModel):
+    category: str = Field(
+        ...,
+        description="Aptitude category"
+    )
+
+    difficulty: str = Field(
+        ...,
+        description="Difficulty level"
+    )
+
+    answers: dict[int, str] = Field(
+        ...,
+        description="Question ID mapped to selected answer"
+    )
+
+
+class AptitudeResult(BaseModel):
+    total_questions: int
+    correct_answers: int
+    incorrect_answers: int
+    score: int
+    accuracy: float
+    weak_area: str | None
+
+
+class AptitudeTestResponse(BaseModel):
+    result: AptitudeResult

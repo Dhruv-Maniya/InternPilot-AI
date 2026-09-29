@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from app.api.routes.internships import router as internships_router
 from app.api.routes.learning import router as learning_router
+from app.api.routes.aptitude import router as aptitude_router
 
 app = FastAPI(
     title="InternPilot AI",
@@ -12,6 +13,7 @@ app = FastAPI(
 
 app.include_router(internships_router)
 app.include_router(learning_router)
+app.include_router(aptitude_router)
 
 
 @app.get("/")
