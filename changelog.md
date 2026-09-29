@@ -299,3 +299,23 @@ All notable changes to InternPilot AI will be documented in this file.
 - Focused Watchlist tests: 5 passed.
 - Full backend test suite: 57 passed.
 - Swagger API testing completed successfully for add, retrieve, delete, and deletion verification.
+
+## Applications Feature
+- Added application tracking functionality.
+- Added application schema with application ID, internship details, company, application URL, and status.
+- Added application service for creating, viewing, updating, and removing applications.
+- Added supported application statuses:
+  - Applied
+  - Shortlisted
+  - Interview
+  - Rejected
+  - Selected
+- Prevented duplicate applications using application ID.
+- Added application status update functionality.
+- Added Applications API routes:
+  - `POST /api/applications`
+  - `GET /api/applications`
+  - `PATCH /api/applications/{application_id}/status`
+  - `DELETE /api/applications/{application_id}`
+- Added automated tests for application creation, duplicate prevention, retrieval, status updates, invalid statuses, and deletion.
+- Full test suite: **66 tests passed**.
