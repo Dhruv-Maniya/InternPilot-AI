@@ -259,3 +259,21 @@ All notable changes to InternPilot AI will be documented in this file.
 - Focused Resume tests: 5 passed.
 - Full backend test suite: 47 passed.
 - Swagger API testing completed successfully for resume skill extraction.
+
+## 2026-09-29
+
+### Added
+- Added Interview Preparation backend functionality.
+- Added interview request and response schemas.
+- Added curated interview questions for Data Analyst and Data Scientist roles.
+- Added Technical and HR interview question categories.
+- Added role and interview-type filtering.
+- Added case-insensitive interview question matching.
+- Added `POST /api/interview/questions` endpoint.
+- Added 5 automated tests for interview question retrieval.
+- Added 404 handling when no matching interview questions are available.
+
+### Testing
+- Focused Interview tests: 5 passed.
+- Full backend test suite: 52 passed.
+- Swagger API testing completed successfully for valid and invalid interview requests.
