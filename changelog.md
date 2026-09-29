@@ -198,3 +198,16 @@ All notable changes to InternPilot AI will be documented in this file.
 - Verified AI service error handling.
 - Full backend test suite now contains 26 automated tests.
 - All 26 backend tests passed successfully.
+
+## 2026-09-29
+
+### Added
+- Added Skill Gap Analysis API at `POST /api/learning/skill-gap`.
+- Added skill matching for required and preferred internship skills.
+- Added missing-skill detection.
+- Added beginner-level learning recommendations for missing skills.
+- Added automated tests for skill normalization, skill matching, recommendations, and complete skill-gap analysis.
+
+### Testing
+- Focused learning tests: 5 passed.
+- Full test suite: 31 passed.
