@@ -242,3 +242,20 @@ All notable changes to InternPilot AI will be documented in this file.
 - Focused aptitude tests: 6 passed.
 - Full backend test suite: 42 passed.
 - Swagger API testing completed for question retrieval and test submission.
+
+## 2026-09-29
+
+### Added
+- Added Resume + Skills backend functionality.
+- Added resume request and response schemas.
+- Added curated technical skill detection from resume text.
+- Added case-insensitive skill extraction.
+- Added word-boundary matching to prevent false skill detection.
+- Added `POST /api/resume/skills` endpoint.
+- Added automated tests for resume skill extraction.
+- Added regression test to prevent false detection of `C` inside other words.
+
+### Testing
+- Focused Resume tests: 5 passed.
+- Full backend test suite: 47 passed.
+- Swagger API testing completed successfully for resume skill extraction.
