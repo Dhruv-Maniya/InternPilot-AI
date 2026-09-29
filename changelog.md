@@ -277,3 +277,25 @@ All notable changes to InternPilot AI will be documented in this file.
 - Focused Interview tests: 5 passed.
 - Full backend test suite: 52 passed.
 - Swagger API testing completed successfully for valid and invalid interview requests.
+
+## 2026-09-29
+
+### Added
+- Added Watchlist backend functionality.
+- Added watchlist item and request/response schemas.
+- Added in-memory watchlist storage.
+- Added internship add functionality.
+- Added duplicate internship prevention.
+- Added watchlist retrieval functionality.
+- Added internship removal functionality.
+- Added application deadline support in watchlist items.
+- Added `POST /api/watchlist` endpoint.
+- Added `GET /api/watchlist` endpoint.
+- Added `DELETE /api/watchlist/{internship_id}` endpoint.
+- Added 5 automated tests for watchlist operations.
+- Added 404 handling when removing an internship that is not in the watchlist.
+
+### Testing
+- Focused Watchlist tests: 5 passed.
+- Full backend test suite: 57 passed.
+- Swagger API testing completed successfully for add, retrieve, delete, and deletion verification.
