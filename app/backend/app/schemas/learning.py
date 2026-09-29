@@ -33,3 +33,22 @@ class SkillGapResponse(BaseModel):
     missing_preferred_skills: list[str]
     skills_to_learn: list[str]
     recommendations: list[LearningRecommendation]
+
+class LearningResource(BaseModel):
+    skill: str
+    title: str
+    resource_type: str
+    url: str
+    description: str
+
+
+class LearningResourceRequest(BaseModel):
+    skills: list[str] = Field(
+        ...,
+        min_length=1,
+        description="Skills for which learning resources are requested"
+    )
+
+
+class LearningResourceResponse(BaseModel):
+    resources: list[LearningResource]

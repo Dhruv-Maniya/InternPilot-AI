@@ -211,3 +211,16 @@ All notable changes to InternPilot AI will be documented in this file.
 ### Testing
 - Focused learning tests: 5 passed.
 - Full test suite: 31 passed.
+
+## 2026-09-29
+
+### Added
+- Added Learning Resource Recommendation API at `POST /api/learning/resources`.
+- Added curated learning resources for supported skills.
+- Added resource lookup based on normalized skill names.
+- Added learning resource schemas for API requests and responses.
+- Added automated tests for skill normalization, known skills, multiple skills, unknown skills, and empty skills.
+
+### Testing
+- Focused learning resource tests: 5 passed.
+- Full test suite: 36 passed.
