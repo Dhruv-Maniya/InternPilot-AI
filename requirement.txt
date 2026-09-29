@@ -6,3 +6,4 @@ python-dotenv
 google-search-results
 openai
 openai-agents
+supabase

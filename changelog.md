@@ -175,3 +175,14 @@ All notable changes to InternPilot AI will be documented in this file.
 ### Testing
 - All 9 matching tests passed using pytest.
 - Verified the internship matching API returns HTTP 200 OK.
+
+## [Unreleased] - 2026-09-29
+
+### Added
+- Added automated tests for the Internship Discovery Agent service.
+- Added mocked Runner.run() testing to verify agent output without making real Gemini/OpenAI API calls.
+
+### Testing
+- Verified internship search, filtering, and matching tests.
+- Verified the AI service wrapper using a mocked Agents SDK Runner.
+- Full backend test suite: 25 tests passed.

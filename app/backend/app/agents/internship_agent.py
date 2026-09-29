@@ -32,22 +32,18 @@ gemini_model = OpenAIChatCompletionsModel(
 
 
 # Create a tool that searches internships using SerpApi
-@function_tool
-def search_internships(
+def _search_internships(
     query: str,
     location: str = "India"
 ) -> str:
     """
     Search real internship and job listings using SerpApi.
-
     Args:
         query: Internship role or skills, such as Python Data Science Intern.
         location: Preferred city or region, such as Mumbai or India.
-
     Returns:
         A JSON string containing the internship search results.
     """
-
     internships = serpapi_service.search_internships(
         query=query,
         location=location
@@ -59,6 +55,9 @@ def search_internships(
     ]
 
     return json.dumps(results, ensure_ascii=False)
+
+
+search_internships = function_tool(_search_internships)
 
 
 # Create Internship Discovery Agent
