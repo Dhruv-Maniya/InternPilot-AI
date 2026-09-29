@@ -186,3 +186,15 @@ All notable changes to InternPilot AI will be documented in this file.
 - Verified internship search, filtering, and matching tests.
 - Verified the AI service wrapper using a mocked Agents SDK Runner.
 - Full backend test suite: 25 tests passed.
+
+## [Unreleased] - 2026-09-29
+
+### Added
+- Added automated error-handling test for the Internship Discovery Agent service.
+- Added mocked AI Runner failure testing to verify RuntimeError propagation.
+
+### Testing
+- Verified successful Internship Discovery Agent execution.
+- Verified AI service error handling.
+- Full backend test suite now contains 26 automated tests.
+- All 26 backend tests passed successfully.
