@@ -366,3 +366,21 @@ All notable changes to InternPilot AI will be documented in this file.
 - Migration 002: Internship schema
 - Migration 003: Aptitude schema
 - Migration 004: Applications and watchlist schema
+
+## 2026-09-30 — Row Level Security (RLS) in supabase
+
+### Added
+- Enabled Row Level Security on all user-specific tables.
+- Added user ownership policies for `profiles`.
+- Added user ownership policies for `profile_skills`.
+- Added user ownership policies for `aptitude_attempts`.
+- Added ownership-based policies for `aptitude_answers` through `aptitude_attempts`.
+- Added user ownership policies for `applications`.
+- Added user ownership policies for `watchlist`.
+
+### Security
+- Authenticated users can access only their own profile data.
+- Authenticated users can access only their own aptitude attempts and answers.
+- Authenticated users can access only their own applications.
+- Authenticated users can access only their own watchlist.
+- Verified all 24 RLS policies using `pg_policies`.
