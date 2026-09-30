@@ -319,3 +319,31 @@ All notable changes to InternPilot AI will be documented in this file.
   - `DELETE /api/applications/{application_id}`
 - Added automated tests for application creation, duplicate prevention, retrieval, status updates, invalid statuses, and deletion.
 - Full test suite: **66 tests passed**.
+
+## 2026-09-30
+
+### Added
+
+- Added Deadline Alert and Notification backend functionality.
+- Added notification schemas for deadline alerts and notification responses.
+- Added deadline parsing and days-remaining calculation.
+- Added configurable deadline alert window with a default of 3 days.
+- Added notification messages for deadlines today, tomorrow, and upcoming deadlines.
+- Added `GET /api/notifications/deadlines` endpoint.
+- Added support for configurable alert windows using the `alert_days` query parameter.
+- Added handling for missing, invalid, and expired deadlines.
+- Added automated tests for deadline parsing, deadline calculations, notification generation, and API behavior.
+- Registered the Notifications router in the FastAPI application.
+
+### Fixed
+
+- Corrected the Watchlist service source so `get_watchlist()` is explicitly defined.
+- Preserved Watchlist test isolation when Notification tests manipulate temporary Watchlist data.
+
+### Testing
+
+- Focused Notification service tests: 11 passed.
+- Notification API tests: 3 passed.
+- Watchlist tests: 5 passed.
+- Full backend test suite: 80 passed.
+- Swagger API testing completed successfully for deadline notifications.
