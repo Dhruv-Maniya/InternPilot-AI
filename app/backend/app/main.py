@@ -8,6 +8,7 @@ from app.api.routes.interview import router as interview_router
 from app.api.routes.watchlist import router as watchlist_router
 from app.api.routes.applications import router as applications_router
 from app.api.routes.notifications import router as notifications_router
+from app.api.routes.auth import router as auth_router
 
 app = FastAPI(
     title="InternPilot AI",
@@ -24,6 +25,7 @@ app.include_router(interview_router)
 app.include_router(watchlist_router)
 app.include_router(applications_router)
 app.include_router(notifications_router)
+app.include_router(auth_router)
 
 @app.get("/")
 def home():

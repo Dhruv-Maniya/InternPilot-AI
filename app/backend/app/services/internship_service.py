@@ -2,6 +2,7 @@ import re
 
 from app.schemas.internship import StudentProfile
 from app.services.serpapi_service import serpapi_service
+from app.services.supabase_service import supabase_service
 
 
 # ============================================================
@@ -64,6 +65,66 @@ SKILL_ALIASES = {
     "MongoDB": ["mongodb", "mongo db"]
 }
 
+def save_internship_to_supabase(
+    internship,
+    required_skills: list[str],
+    preferred_skills: list[str]
+):
+    if not internship.url:
+        return None
+
+    internship_data = {
+        "title": internship.title,
+        "company": internship.company,
+        "location": internship.location,
+        "description": internship.description,
+        "source": internship.source,
+        "url": internship.url
+    }
+
+    response = (
+        supabase_service.admin_client
+        .table("internships")
+        .upsert(
+            internship_data,
+            on_conflict="url"
+        )
+        .execute()
+    )
+
+    if not response.data:
+        return None
+
+    internship_id = response.data[0]["id"]
+
+    requirements = []
+
+    for skill in required_skills:
+        requirements.append({
+            "internship_id": internship_id,
+            "skill": skill,
+            "requirement_type": "required"
+        })
+
+    for skill in preferred_skills:
+        requirements.append({
+            "internship_id": internship_id,
+            "skill": skill,
+            "requirement_type": "preferred"
+        })
+
+    if requirements:
+        (
+            supabase_service.admin_client
+            .table("internship_requirements")
+            .upsert(
+                requirements,
+                on_conflict="internship_id,skill,requirement_type"
+            )
+            .execute()
+        )
+
+    return internship_id
 
 # ============================================================
 # 2. TEXT NORMALIZATION
