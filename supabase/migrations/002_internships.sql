@@ -5,8 +5,10 @@ create table public.internships (
     location text,
     description text,
     source text,
-    url text,
-    created_at timestamptz not null default now()
+    url text not null,
+    created_at timestamptz not null default now(),
+
+    constraint internships_url_unique unique (url)
 );
 
 create table public.internship_requirements (

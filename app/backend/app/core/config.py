@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     # Supabase
     supabase_url: str = ""
     supabase_key: str = ""
+    supabase_service_role_key: str = ""
 
     model_config = SettingsConfigDict(
         env_file=".env",

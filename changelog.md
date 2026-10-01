@@ -384,3 +384,39 @@ All notable changes to InternPilot AI will be documented in this file.
 - Authenticated users can access only their own applications.
 - Authenticated users can access only their own watchlist.
 - Verified all 24 RLS policies using `pg_policies`.
+
+# Changelog
+
+## 2026-10-01 — Watchlist Supabase Persistence
+
+### Added
+- Added authenticated user access-token dependency for backend routes.
+- Added user-scoped Supabase client support.
+- Added Supabase REST API helper for authenticated database requests.
+- Migrated Watchlist persistence from in-memory storage to Supabase.
+- Added authenticated Watchlist INSERT, SELECT, and DELETE operations.
+- Preserved the existing Watchlist API response format.
+
+### Security
+- Watchlist records are stored with the authenticated user's `user_id`.
+- Supabase Row Level Security remains enabled.
+- Watchlist INSERT policy verifies `auth.uid() = user_id`.
+- Watchlist SELECT, UPDATE, and DELETE policies remain user-scoped.
+- Access tokens are never accepted as a frontend-supplied user ID.
+
+### Verification
+- Authentication `/api/auth/me` → 200
+- Watchlist GET → 200
+- Watchlist POST → 200
+- Watchlist GET after POST → 200
+- Watchlist DELETE → 200
+- Direct Supabase REST INSERT with RLS → 201
+- Temporary RLS test record → successfully deleted
+- Watchlist RLS policies verified
+- Database privileges verified
+- Python syntax/import checks passed
+
+### Technical Note
+- The installed `supabase-py 2.31.0` PostgREST client was unable to perform the Watchlist INSERT correctly under RLS.
+- Direct authenticated Supabase REST requests successfully passed the same RLS policy.
+- Watchlist INSERT was therefore implemented through the authenticated Supabase REST API without weakening RLS.
