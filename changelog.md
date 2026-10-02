@@ -454,3 +454,27 @@ All notable changes to InternPilot AI will be documented in this file.
 ### Technical Note
 - Applications persistence now uses authenticated Supabase requests instead of the previous in-memory `APPLICATIONS` list.
 - Existing Applications API endpoints and response structures were preserved.
+
+## 2026-10-02 — Applications Duplicate Protection
+
+### Added
+- Added a database unique constraint on `(user_id, application_id)` for Applications.
+- Prevented the same authenticated user from creating duplicate Applications with the same `application_id`.
+
+### Data Integrity
+- Existing duplicate Applications were checked before adding the constraint.
+- No duplicate `(user_id, application_id)` records existed.
+- The live Supabase database now enforces the unique constraint.
+- The migration file `004_applications.sql` was updated to match the live database schema.
+
+### Verification
+- Live unique constraint creation verified successfully.
+- First test Application insertion → 200
+- Duplicate Application insertion → blocked by PostgreSQL unique constraint `23505`
+- Temporary test Application deleted successfully → 200
+- `git diff --check` passed.
+
+### Technical Note
+- Constraint name: `applications_user_application_unique`
+- Constraint applies to `(user_id, application_id)`.
+- Different users may still use the same `application_id`.
