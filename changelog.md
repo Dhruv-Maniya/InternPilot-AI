@@ -420,3 +420,37 @@ All notable changes to InternPilot AI will be documented in this file.
 - The installed `supabase-py 2.31.0` PostgREST client was unable to perform the Watchlist INSERT correctly under RLS.
 - Direct authenticated Supabase REST requests successfully passed the same RLS policy.
 - Watchlist INSERT was therefore implemented through the authenticated Supabase REST API without weakening RLS.
+
+## 2026-10-02 — Applications Supabase Persistence
+
+### Added
+- Migrated Applications persistence from in-memory storage to Supabase.
+- Added authenticated user access-token handling for Applications routes.
+- Added user-scoped Applications database operations.
+- Added authenticated Applications INSERT, SELECT, UPDATE, and DELETE operations.
+- Preserved the existing Applications API response format.
+
+### Security
+- Application records are stored with the authenticated user's `user_id`.
+- Supabase Row Level Security remains enabled.
+- Applications INSERT policy verifies `auth.uid() = user_id`.
+- Applications SELECT, UPDATE, and DELETE policies remain user-scoped.
+- Access tokens are never accepted as a frontend-supplied user ID.
+
+### Verification
+- Applications RLS policies verified.
+- Applications database privileges verified.
+- Applications GET before insertion → 200
+- Applications POST → 200
+- Applications GET after POST → 200
+- Applications PATCH status update → 200
+- Applications GET after status update → 200
+- Applications DELETE → 200
+- Final Applications GET after deletion → 200 with empty result
+- Temporary test application successfully removed.
+- Python syntax checks passed.
+- Applications router import verification passed.
+
+### Technical Note
+- Applications persistence now uses authenticated Supabase requests instead of the previous in-memory `APPLICATIONS` list.
+- Existing Applications API endpoints and response structures were preserved.

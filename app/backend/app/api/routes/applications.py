@@ -1,5 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from app.api.dependencies import (
+    get_current_access_token,
+    get_current_user,
+)
 from app.schemas.applications import (
     ApplicationCreateRequest,
     ApplicationItem,
@@ -25,7 +29,9 @@ router = APIRouter(
     response_model=ApplicationItem
 )
 def create_application(
-    request: ApplicationCreateRequest
+    request: ApplicationCreateRequest,
+    user=Depends(get_current_user),
+    access_token=Depends(get_current_access_token),
 ):
     """Create an application record."""
 
@@ -38,19 +44,46 @@ def create_application(
         status=request.status,
     )
 
-    return add_application(application)
+    try:
+        return add_application(
+            application=application,
+            user_id=str(user.id),
+            access_token=access_token,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc)
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to save application: {exc}"
+        )
 
 
 @router.get(
     "",
     response_model=ApplicationResponse
 )
-def get_application_list():
-    """Return all application records."""
+def get_application_list(
+    user=Depends(get_current_user),
+    access_token=Depends(get_current_access_token),
+):
+    """Return the authenticated user's applications."""
 
-    return ApplicationResponse(
-        applications=get_applications()
-    )
+    try:
+        return ApplicationResponse(
+            applications=get_applications(
+                user_id=str(user.id),
+                access_token=access_token,
+            )
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to load applications: {exc}"
+        )
 
 
 @router.patch(
@@ -59,14 +92,24 @@ def get_application_list():
 )
 def update_application(
     application_id: str,
-    request: ApplicationStatusUpdateRequest
+    request: ApplicationStatusUpdateRequest,
+    user=Depends(get_current_user),
+    access_token=Depends(get_current_access_token),
 ):
     """Update the status of an application."""
 
-    application = update_application_status(
-        application_id=application_id,
-        status=request.status
-    )
+    try:
+        application = update_application_status(
+            application_id=application_id,
+            status=request.status,
+            user_id=str(user.id),
+            access_token=access_token,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to update application: {exc}"
+        )
 
     if application is None:
         raise HTTPException(
@@ -81,11 +124,23 @@ def update_application(
     "/{application_id}"
 )
 def delete_application(
-    application_id: str
+    application_id: str,
+    user=Depends(get_current_user),
+    access_token=Depends(get_current_access_token),
 ):
     """Remove an application record."""
 
-    removed = remove_application(application_id)
+    try:
+        removed = remove_application(
+            application_id=application_id,
+            user_id=str(user.id),
+            access_token=access_token,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to remove application: {exc}"
+        )
 
     if not removed:
         raise HTTPException(
