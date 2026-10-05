@@ -419,4 +419,65 @@ All notable changes to InternPilot AI will be documented in this file.
 ### Technical Note
 - The installed `supabase-py 2.31.0` PostgREST client was unable to perform the Watchlist INSERT correctly under RLS.
 - Direct authenticated Supabase REST requests successfully passed the same RLS policy.
+
 - Watchlist INSERT was therefore implemented through the authenticated Supabase REST API without weakening RLS.
+
+- Watchlist INSERT was therefore implemented through the authenticated Supabase REST API without weakening RLS.
+
+## 2026-10-02 — Applications Supabase Persistence
+
+### Added
+- Migrated Applications persistence from in-memory storage to Supabase.
+- Added authenticated user access-token handling for Applications routes.
+- Added user-scoped Applications database operations.
+- Added authenticated Applications INSERT, SELECT, UPDATE, and DELETE operations.
+- Preserved the existing Applications API response format.
+
+### Security
+- Application records are stored with the authenticated user's `user_id`.
+- Supabase Row Level Security remains enabled.
+- Applications INSERT policy verifies `auth.uid() = user_id`.
+- Applications SELECT, UPDATE, and DELETE policies remain user-scoped.
+- Access tokens are never accepted as a frontend-supplied user ID.
+
+### Verification
+- Applications RLS policies verified.
+- Applications database privileges verified.
+- Applications GET before insertion → 200
+- Applications POST → 200
+- Applications GET after POST → 200
+- Applications PATCH status update → 200
+- Applications GET after status update → 200
+- Applications DELETE → 200
+- Final Applications GET after deletion → 200 with empty result
+- Temporary test application successfully removed.
+- Python syntax checks passed.
+- Applications router import verification passed.
+
+### Technical Note
+- Applications persistence now uses authenticated Supabase requests instead of the previous in-memory `APPLICATIONS` list.
+- Existing Applications API endpoints and response structures were preserved.
+
+## 2026-10-02 — Applications Duplicate Protection
+
+### Added
+- Added a database unique constraint on `(user_id, application_id)` for Applications.
+- Prevented the same authenticated user from creating duplicate Applications with the same `application_id`.
+
+### Data Integrity
+- Existing duplicate Applications were checked before adding the constraint.
+- No duplicate `(user_id, application_id)` records existed.
+- The live Supabase database now enforces the unique constraint.
+- The migration file `004_applications.sql` was updated to match the live database schema.
+
+### Verification
+- Live unique constraint creation verified successfully.
+- First test Application insertion → 200
+- Duplicate Application insertion → blocked by PostgreSQL unique constraint `23505`
+- Temporary test Application deleted successfully → 200
+- `git diff --check` passed.
+
+### Technical Note
+- Constraint name: `applications_user_application_unique`
+- Constraint applies to `(user_id, application_id)`.
+- Different users may still use the same `application_id`.

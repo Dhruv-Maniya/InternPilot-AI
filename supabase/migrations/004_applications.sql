@@ -10,7 +10,13 @@ create table public.applications (
     created_at timestamptz not null default now(),
 
     constraint applications_status_check
+
         check (status in ('Applied', 'Shortlisted', 'Interview', 'Rejected', 'Selected'))
+
+        check (status in ('Applied', 'Shortlisted', 'Interview', 'Rejected', 'Selected')),
+
+    constraint applications_user_application_unique
+        unique (user_id, application_id)
 );
 
 create table public.watchlist (
