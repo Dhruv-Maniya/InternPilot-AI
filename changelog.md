@@ -519,3 +519,23 @@ All notable changes to InternPilot AI will be documented in this file.
 - Learning resource tests: 5 passed.
 - Learning API tests: 3 passed.
 - Full backend test suite: 84 passed.
+
+## 2026-10-05
+
+### Resume Assistance
+
+- Added resume analysis functionality to the Resume service.
+- Added `ResumeAnalysisRequest` and `ResumeAnalysisResponse` schemas.
+- Added `POST /api/resume/analyze` endpoint.
+- Added resume skill count analysis.
+- Added basic resume improvement suggestions for missing projects, achievements, experience, and resume details.
+- Preserved the existing `POST /api/resume/skills` endpoint.
+- Added automated tests for resume analysis service logic.
+- Added API tests for successful resume analysis and empty resume validation.
+- Verified the new endpoint manually through Swagger.
+
+### Testing
+
+- Resume service tests: **9 passed**
+- Resume API tests: **2 passed**
+- Full backend test suite: **90 passed**
