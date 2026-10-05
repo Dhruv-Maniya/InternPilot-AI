@@ -51,6 +51,8 @@ def create_deadline_message(days_remaining: int) -> str:
 
 
 def get_deadline_notifications(
+    user_id: str,
+    access_token: str,
     alert_days: int = DEFAULT_ALERT_DAYS,
     today: date | None = None
 ) -> list[DeadlineNotification]:
@@ -60,7 +62,12 @@ def get_deadline_notifications(
 
     current_date = today or date.today()
 
-    for internship in watchlist_service.get_watchlist():
+    watchlist = watchlist_service.get_watchlist(
+        user_id,
+        access_token
+    )
+
+    for internship in watchlist:
 
         if not internship.deadline:
             continue
