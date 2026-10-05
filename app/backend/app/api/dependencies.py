@@ -17,6 +17,7 @@ def get_current_user(
 
     return get_user_from_token(credentials.credentials)
 
+
 def get_current_access_token(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
@@ -25,4 +26,5 @@ def get_current_access_token(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required."
         )
+
     return credentials.credentials

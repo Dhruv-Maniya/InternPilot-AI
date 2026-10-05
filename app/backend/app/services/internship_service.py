@@ -742,9 +742,19 @@ def match_internships(
         else:
 
             recommendation_priority = 2
+        
+        # ----------------------------------------------------
+        # I. Save internship to Supabase
+        # ----------------------------------------------------
+
+        save_internship_to_supabase(
+            internship=internship,
+            required_skills=required_skills,
+            preferred_skills=preferred_skills
+        )
 
         # ----------------------------------------------------
-        # I. Append processed internship
+        # J. Append processed internship
         # ----------------------------------------------------
 
         matched_internships.append({
@@ -778,7 +788,7 @@ def match_internships(
         })
 
     # --------------------------------------------------------
-    # J. Sort internship recommendations
+    # K. Sort internship recommendations
     # --------------------------------------------------------
 
     matched_internships.sort(
@@ -793,7 +803,7 @@ def match_internships(
     )
 
     # --------------------------------------------------------
-    # K. Return final results
+    # L. Return final results
     # --------------------------------------------------------
 
     return matched_internships
