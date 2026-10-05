@@ -481,3 +481,41 @@ All notable changes to InternPilot AI will be documented in this file.
 - Constraint name: `applications_user_application_unique`
 - Constraint applies to `(user_id, application_id)`.
 - Different users may still use the same `application_id`.
+
+## 2026-10-05
+
+### Changed
+
+- Migrated deadline notification logic to use the Supabase-backed user watchlist.
+- Updated deadline notification service to accept the authenticated user ID and Supabase access token.
+- Updated the deadline notification API to require authenticated users.
+- Connected notification requests to the existing Supabase authentication dependencies.
+- Removed notification test dependency on the old in-memory `WATCHLIST`.
+- Updated notification service and API tests to mock the Supabase-backed watchlist and authentication flow.
+
+### Testing
+
+- Notification service tests: 11 passed.
+- Notification API tests: 3 passed.
+- Full backend test suite: 81 passed.
+
+## 2026-10-05
+
+### Added
+
+- Added automated API tests for the Learning feature.
+- Added coverage for the skill-gap API endpoint.
+- Added coverage for the learning resources API endpoint.
+- Added handling tests for unknown learning skills.
+
+### Fixed
+
+- Fixed the Learning skill-gap API route so it correctly calls the skill-gap analysis service.
+- Verified the Learning router and both Learning API endpoints are correctly registered and functional.
+
+### Testing
+
+- Learning service tests: 5 passed.
+- Learning resource tests: 5 passed.
+- Learning API tests: 3 passed.
+- Full backend test suite: 84 passed.
