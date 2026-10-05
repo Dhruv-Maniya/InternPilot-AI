@@ -26,3 +26,23 @@ class InterviewQuestionResponse(BaseModel):
     role: str
     interview_type: str
     questions: list[InterviewQuestion]
+
+
+class InterviewAnswerRequest(BaseModel):
+    question: str = Field(
+        ...,
+        min_length=1,
+        description="Interview question"
+    )
+
+    answer: str = Field(
+        ...,
+        min_length=1,
+        description="Student's interview answer"
+    )
+
+
+class InterviewAnswerResponse(BaseModel):
+    question: str
+    answer: str
+    feedback: str
