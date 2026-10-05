@@ -539,3 +539,24 @@ All notable changes to InternPilot AI will be documented in this file.
 - Resume service tests: **9 passed**
 - Resume API tests: **2 passed**
 - Full backend test suite: **90 passed**
+
+## 2026-10-05
+
+### Interview Assistance
+
+- Added Interview Assistance AI agent using Gemini through the OpenAI Agents SDK.
+- Added AI-powered interview answer evaluation.
+- Added `InterviewAnswerRequest` and `InterviewAnswerResponse` schemas.
+- Added `POST /api/interview/evaluate` endpoint.
+- Added AI service wrapper for interview answer evaluation.
+- Preserved the existing `POST /api/interview/questions` endpoint.
+- Added API tests for interview question retrieval and answer evaluation.
+- Added tests for AI success and error handling.
+- Added graceful handling for Gemini provider `503 Service Unavailable` errors.
+- Verified the evaluation endpoint through Swagger.
+- Gemini availability issue is handled gracefully with an HTTP 503 response.
+
+### Testing
+
+- Interview tests: **14 passed**
+- Full backend test suite: **99 passed**

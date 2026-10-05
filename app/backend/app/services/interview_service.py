@@ -1,3 +1,6 @@
+from agents import Runner
+
+from app.agents.interview_agent import interview_agent
 from app.schemas.interview import InterviewQuestion
 
 
@@ -68,3 +71,27 @@ def get_interview_questions(
         if question.role.lower() == normalized_role
         and question.interview_type.lower() == normalized_type
     ]
+
+
+async def evaluate_interview_answer(
+    question: str,
+    answer: str
+) -> str:
+    """Evaluate a student's interview answer using the AI agent."""
+
+    user_message = f"""
+Interview Question:
+{question}
+
+Student Answer:
+{answer}
+
+Evaluate the student's answer according to your instructions.
+"""
+
+    result = await Runner.run(
+        interview_agent,
+        user_message
+    )
+
+    return result.final_output

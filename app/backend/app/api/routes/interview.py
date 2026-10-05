@@ -1,10 +1,17 @@
 from fastapi import APIRouter, HTTPException
+from openai import InternalServerError
 
 from app.schemas.interview import (
     InterviewQuestionRequest,
     InterviewQuestionResponse,
+    InterviewAnswerRequest,
+    InterviewAnswerResponse,
 )
-from app.services.interview_service import get_interview_questions
+
+from app.services.interview_service import (
+    get_interview_questions,
+    evaluate_interview_answer,
+)
 
 
 router = APIRouter(
@@ -37,4 +44,32 @@ def get_interview_question_list(
         role=request.role,
         interview_type=request.interview_type,
         questions=questions
+    )
+
+
+@router.post(
+    "/evaluate",
+    response_model=InterviewAnswerResponse
+)
+async def evaluate_interview_answer_endpoint(
+    request: InterviewAnswerRequest
+):
+    """Evaluate a student's interview answer using AI."""
+
+    try:
+        feedback = await evaluate_interview_answer(
+            question=request.question,
+            answer=request.answer
+        )
+
+    except InternalServerError:
+        raise HTTPException(
+            status_code=503,
+            detail="Interview AI is temporarily unavailable. Please try again later."
+        )
+
+    return InterviewAnswerResponse(
+        question=request.question,
+        answer=request.answer,
+        feedback=feedback
     )
