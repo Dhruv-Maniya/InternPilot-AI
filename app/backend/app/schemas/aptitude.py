@@ -50,3 +50,38 @@ class AptitudeResult(BaseModel):
 
 class AptitudeTestResponse(BaseModel):
     result: AptitudeResult
+
+class AptitudeAnalysisRequest(BaseModel):
+    category: str = Field(
+        ...,
+        description="Aptitude category"
+    )
+    total_questions: int = Field(
+        ...,
+        ge=0,
+        description="Total number of questions"
+    )
+    correct_answers: int = Field(
+        ...,
+        ge=0,
+        description="Number of correctly answered questions"
+    )
+    score: int = Field(
+        ...,
+        ge=0,
+        description="Aptitude test score"
+    )
+    accuracy: float = Field(
+        ...,
+        ge=0,
+        le=100,
+        description="Aptitude test accuracy percentage"
+    )
+    weak_area: str | None = Field(
+        default=None,
+        description="Identified weak area"
+    )
+
+
+class AptitudeAnalysisResponse(BaseModel):
+    analysis: str

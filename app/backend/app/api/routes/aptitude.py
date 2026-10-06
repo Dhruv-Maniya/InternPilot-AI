@@ -1,3 +1,4 @@
+import openai
 from fastapi import APIRouter, HTTPException
 
 from app.schemas.aptitude import (
@@ -5,10 +6,13 @@ from app.schemas.aptitude import (
     AptitudeTestRequest,
     AptitudeQuestion,
     AptitudeTestResponse,
+    AptitudeAnalysisRequest,
+    AptitudeAnalysisResponse,
 )
 from app.services.aptitude_service import (
     get_questions,
     calculate_result,
+    analyze_aptitude_result,
 )
 
 
@@ -69,3 +73,32 @@ def submit_aptitude_test(
     return AptitudeTestResponse(
         result=result
     )
+
+@router.post(
+    "/analyze",
+    response_model=AptitudeAnalysisResponse
+)
+async def analyze_aptitude(
+    request: AptitudeAnalysisRequest
+):
+    """Analyze aptitude test performance using AI."""
+
+    try:
+        analysis = await analyze_aptitude_result(
+            category=request.category,
+            total_questions=request.total_questions,
+            correct_answers=request.correct_answers,
+            score=request.score,
+            accuracy=request.accuracy,
+            weak_area=request.weak_area,
+        )
+
+        return AptitudeAnalysisResponse(
+            analysis=analysis
+        )
+
+    except openai.InternalServerError:
+        raise HTTPException(
+            status_code=503,
+            detail="Aptitude AI is temporarily unavailable. Please try again later."
+        )

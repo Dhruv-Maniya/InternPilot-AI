@@ -560,3 +560,27 @@ All notable changes to InternPilot AI will be documented in this file.
 
 - Interview tests: **14 passed**
 - Full backend test suite: **99 passed**
+
+## 2026-10-06
+
+### Aptitude AI
+
+- Added Aptitude AI Agent using Gemini through the OpenAI Agents SDK.
+- Added AI-powered aptitude performance analysis.
+- Added `AptitudeAnalysisRequest` and `AptitudeAnalysisResponse` schemas.
+- Added `analyze_aptitude_result()` service function.
+- Added `POST /api/aptitude/analyze` endpoint.
+- Added personalized performance analysis covering strengths, weak areas, recommendations, and overall feedback.
+- Added automated tests for Aptitude AI service behavior.
+- Added API tests for successful aptitude analysis and weak-area analysis.
+- Added request validation tests for invalid accuracy values.
+- Added graceful handling for Gemini `503 Service Unavailable` errors.
+- Verified the Aptitude AI endpoint through Swagger with a real Gemini request.
+
+### Testing
+
+- Aptitude tests: **6 passed**
+- Aptitude AI service tests: **2 passed**
+- Aptitude API tests: **4 passed**
+- Full backend test suite: **105 passed**
+- Real Gemini Swagger test: **200 OK**

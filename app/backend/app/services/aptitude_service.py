@@ -1,5 +1,7 @@
-from app.schemas.aptitude import AptitudeQuestion
+from agents import Runner
 
+from app.schemas.aptitude import AptitudeQuestion
+from app.agents.aptitude_agent import aptitude_agent
 
 APTITUDE_QUESTIONS = [
     AptitudeQuestion(
@@ -108,3 +110,44 @@ def calculate_result(
         "accuracy": accuracy,
         "weak_area": weak_area
     }
+
+async def analyze_aptitude_result(
+    category: str,
+    total_questions: int,
+    correct_answers: int,
+    score: int,
+    accuracy: float,
+    weak_area: str | None
+) -> str:
+    """Analyze a student's aptitude test performance using the AI agent."""
+
+    user_message = f"""
+Aptitude Test Performance:
+
+Category:
+{category}
+
+Total Questions:
+{total_questions}
+
+Correct Answers:
+{correct_answers}
+
+Score:
+{score}
+
+Accuracy:
+{accuracy}%
+
+Weak Area:
+{weak_area or "None"}
+
+Analyze the student's aptitude performance according to your instructions.
+"""
+
+    result = await Runner.run(
+        aptitude_agent,
+        user_message
+    )
+
+    return result.final_output
