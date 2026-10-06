@@ -584,3 +584,18 @@ All notable changes to InternPilot AI will be documented in this file.
 - Aptitude API tests: **4 passed**
 - Full backend test suite: **105 passed**
 - Real Gemini Swagger test: **200 OK**
+
+## 2026-10-06
+
+### AI Service Configuration Cleanup
+
+- Removed the obsolete `OPENAI_API_KEY` environment-variable setup from `app/services/ai_service.py`.
+- Removed the unused `os` and `settings` imports from the legacy AI service.
+- Preserved the existing `run_internship_agent()` behavior.
+- Verified that the legacy AI service tests continue to pass.
+- Confirmed that the current Internship Agent remains responsible for its Gemini configuration.
+
+### Testing
+
+- AI service tests: **2 passed**
+- Full backend test suite: **105 passed**
