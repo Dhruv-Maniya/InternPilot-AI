@@ -1,19 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  HelpCircle,
   Clock,
   CheckCircle2,
   AlertTriangle,
   RotateCw,
   ArrowRight,
   ArrowLeft,
-  Bookmark,
-  Award,
   Sparkles,
-  TrendingUp,
   RefreshCw,
   Flag
 } from 'lucide-react';
@@ -50,6 +45,47 @@ export default function AptitudePage() {
   const [error, setError] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
 
+  const fetchAiAnalysis = useCallback(async (result: AptitudeResult) => {
+    setAnalyzingAi(true);
+    setAiError(null);
+    try {
+      const aiRes = await aptitudeApi.analyze({
+        total_questions: result.total_questions,
+        correct_answers: result.correct_answers,
+        score: result.score,
+        accuracy: result.accuracy,
+        weak_area: result.weak_area,
+        category,
+      });
+      setAiAnalysis(aiRes);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'AI service is temporarily unavailable. Please try again.';
+      setAiError(msg);
+    } finally {
+      setAnalyzingAi(false);
+    }
+  }, [category]);
+
+  const handleSubmitTest = useCallback(async () => {
+    setSubmitting(true);
+    setError(null);
+    try {
+      const submitRes = await aptitudeApi.submit(category, difficulty, selectedAnswers);
+      const res = submitRes.result;
+      setTestResult(res);
+      setTestActive(false);
+      showToast(`Test completed! Score: ${res.score}/${res.total_questions}`, 'success');
+
+      // Fetch AI Analysis automatically
+      fetchAiAnalysis(res);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to submit test.';
+      setError(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  }, [category, difficulty, selectedAnswers, showToast, fetchAiAnalysis]);
+
   // Timer countdown when active
   useEffect(() => {
     if (!testActive || timeLeft <= 0) return;
@@ -65,7 +101,7 @@ export default function AptitudePage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [testActive, timeLeft]);
+  }, [testActive, timeLeft, handleSubmitTest]);
 
   const handleStartTest = async () => {
     setLoading(true);
@@ -86,8 +122,9 @@ export default function AptitudePage() {
       } else {
         setError('No questions returned for this category/difficulty combination.');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch aptitude questions.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to fetch aptitude questions.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -109,45 +146,6 @@ export default function AptitudePage() {
       ...prev,
       [currQ.id]: !prev[currQ.id],
     }));
-  };
-
-  const handleSubmitTest = async () => {
-    setSubmitting(true);
-    setError(null);
-    try {
-      const submitRes = await aptitudeApi.submit(category, difficulty, selectedAnswers);
-      const res = submitRes.result;
-      setTestResult(res);
-      setTestActive(false);
-      showToast(`Test completed! Score: ${res.score}/${res.total_questions}`, 'success');
-
-      // Fetch AI Analysis automatically
-      fetchAiAnalysis(res);
-    } catch (err: any) {
-      setError(err.message || 'Failed to submit test.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const fetchAiAnalysis = async (result: AptitudeResult) => {
-    setAnalyzingAi(true);
-    setAiError(null);
-    try {
-      const aiRes = await aptitudeApi.analyze({
-        total_questions: result.total_questions,
-        correct_answers: result.correct_answers,
-        score: result.score,
-        accuracy: result.accuracy,
-        weak_area: result.weak_area,
-        category,
-      });
-      setAiAnalysis(aiRes);
-    } catch (err: any) {
-      setAiError(err.message || 'AI service is temporarily unavailable. Please try again.');
-    } finally {
-      setAnalyzingAi(false);
-    }
   };
 
   const formatTimer = (seconds: number) => {
@@ -448,47 +446,62 @@ export default function AptitudePage() {
               </div>
             ) : aiAnalysis ? (
               <div>
-                <p style={{ fontSize: '0.875rem', color: '#334155', lineHeight: 1.5, marginBottom: '16px' }}>
-                  {aiAnalysis.feedback}
-                </p>
+                {aiAnalysis.analysis ? (
+                  <div style={{ fontSize: '0.875rem', color: '#1e293b', lineHeight: 1.6, whiteSpace: 'pre-line', padding: '16px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    {aiAnalysis.analysis}
+                  </div>
+                ) : (
+                  <>
+                    {aiAnalysis.feedback && (
+                      <p style={{ fontSize: '0.875rem', color: '#334155', lineHeight: 1.5, marginBottom: '16px' }}>
+                        {aiAnalysis.feedback}
+                      </p>
+                    )}
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '20px' }}>
-                  {/* Strengths */}
-                  <div style={{ padding: '14px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#15803d', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <CheckCircle2 size={15} /> Identified Strengths
-                    </div>
-                    {aiAnalysis.strengths.map((st, i) => (
-                      <div key={i} style={{ fontSize: '0.8125rem', color: '#334155', marginBottom: '4px' }}>
-                        ✓ {st}
+                    {(aiAnalysis.strengths?.length || aiAnalysis.weak_areas?.length) ? (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+                        {aiAnalysis.strengths && aiAnalysis.strengths.length > 0 && (
+                          <div style={{ padding: '14px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                            <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#15803d', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <CheckCircle2 size={15} /> Identified Strengths
+                            </div>
+                            {aiAnalysis.strengths.map((st, i) => (
+                              <div key={i} style={{ fontSize: '0.8125rem', color: '#334155', marginBottom: '4px' }}>
+                                ✓ {st}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {aiAnalysis.weak_areas && aiAnalysis.weak_areas.length > 0 && (
+                          <div style={{ padding: '14px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                            <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#b45309', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <AlertTriangle size={15} /> Targeted Focus Areas
+                            </div>
+                            {aiAnalysis.weak_areas.map((wa, i) => (
+                              <div key={i} style={{ fontSize: '0.8125rem', color: '#334155', marginBottom: '4px' }}>
+                                ⚠ {wa}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
+                    ) : null}
 
-                  {/* Weak Areas */}
-                  <div style={{ padding: '14px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#b45309', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <AlertTriangle size={15} /> Targeted Focus Areas
-                    </div>
-                    {aiAnalysis.weak_areas.map((wa, i) => (
-                      <div key={i} style={{ fontSize: '0.8125rem', color: '#334155', marginBottom: '4px' }}>
-                        ⚠ {wa}
+                    {aiAnalysis.recommendations && aiAnalysis.recommendations.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#0f172a', marginBottom: '8px' }}>
+                          Actionable Recommendations:
+                        </div>
+                        {aiAnalysis.recommendations.map((rec, i) => (
+                          <div key={i} style={{ fontSize: '0.8125rem', color: '#475569', marginBottom: '4px' }}>
+                            → {rec}
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Recommendations */}
-                <div>
-                  <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#0f172a', marginBottom: '8px' }}>
-                    Actionable Recommendations:
-                  </div>
-                  {aiAnalysis.recommendations.map((rec, i) => (
-                    <div key={i} style={{ fontSize: '0.8125rem', color: '#475569', marginBottom: '4px' }}>
-                      → {rec}
-                    </div>
-                  ))}
-                </div>
+                    )}
+                  </>
+                )}
               </div>
             ) : null}
           </div>

@@ -1,6 +1,7 @@
 import {
   AuthUser,
   StudentProfile,
+  Internship,
   MatchedInternship,
   SkillGapResponse,
   LearningResourceResponse,
@@ -18,13 +19,17 @@ import {
   NotificationResponse,
 } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '');
+
+function formatEndpoint(endpoint: string): string {
+  return endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+}
 
 export class ApiError extends Error {
   status: number;
-  data: any;
+  data: unknown;
 
-  constructor(message: string, status: number, data?: any) {
+  constructor(message: string, status: number, data?: unknown) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
@@ -34,7 +39,7 @@ export class ApiError extends Error {
 
 export function getStoredToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('internpilot_access_token') || 'demo-token-intern';
+  return localStorage.getItem('internpilot_access_token');
 }
 
 export function setStoredToken(token: string | null): void {
@@ -47,7 +52,7 @@ export function setStoredToken(token: string | null): void {
 }
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = `${API_BASE_URL}${formatEndpoint(endpoint)}`;
   const token = getStoredToken();
 
   const headers: Record<string, string> = {
@@ -67,15 +72,22 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
     if (!response.ok) {
       let errorMessage = `HTTP Error ${response.status}`;
-      let errorData: any = null;
+      let errorData: unknown = null;
 
       try {
         errorData = await response.json();
-        if (errorData?.detail) {
-          if (typeof errorData.detail === 'string') {
-            errorMessage = errorData.detail;
-          } else if (Array.isArray(errorData.detail)) {
-            errorMessage = errorData.detail.map((d: any) => d.msg || JSON.stringify(d)).join(', ');
+        if (typeof errorData === 'object' && errorData !== null && 'detail' in errorData) {
+          const detail = (errorData as { detail: unknown }).detail;
+          if (typeof detail === 'string') {
+            errorMessage = detail;
+          } else if (Array.isArray(detail)) {
+            errorMessage = detail
+              .map((d: { msg?: string } | unknown) =>
+                typeof d === 'object' && d !== null && 'msg' in d
+                  ? String((d as { msg: unknown }).msg)
+                  : JSON.stringify(d)
+              )
+              .join(', ');
           }
         }
       } catch {
@@ -106,13 +118,13 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     }
 
     return await response.json();
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof ApiError) {
       throw err;
     }
-    // Network or server unreachable
+    const message = err instanceof Error ? err.message : String(err);
     throw new ApiError(
-      'Unable to connect to backend server. Please verify FastAPI is running at http://127.0.0.1:8000',
+      `Unable to connect to backend server: ${message}. Please verify FastAPI is running at ${API_BASE_URL}`,
       0,
       err
     );
@@ -130,9 +142,9 @@ export const authApi = {
 };
 
 export const internshipsApi = {
-  search: async (query: string, location: string = 'India'): Promise<{ count: number; results: any[] }> => {
+  search: async (query: string, location: string = 'India'): Promise<{ count: number; results: Internship[] }> => {
     const params = new URLSearchParams({ query, location });
-    return request<{ count: number; results: any[] }>(`/api/internships/?${params.toString()}`);
+    return request<{ count: number; results: Internship[] }>(`/api/internships/?${params.toString()}`);
   },
 
   match: async (profile: StudentProfile): Promise<{ student: string; count: number; results: MatchedInternship[] }> => {

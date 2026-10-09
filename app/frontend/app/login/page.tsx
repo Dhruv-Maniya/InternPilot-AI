@@ -8,15 +8,13 @@ import {
   Mail,
   Key,
   ArrowRight,
-  ShieldCheck,
-  CheckCircle2,
-  Info
+  ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, user } = useAuth();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState('demo.student@internpilot.ai');
   const [tokenInput, setTokenInput] = useState('');
@@ -35,8 +33,9 @@ export default function LoginPage() {
     try {
       await login(tokenInput.trim(), email);
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Authentication failed. Please verify token.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Authentication failed. Please verify token.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -48,8 +47,9 @@ export default function LoginPage() {
     try {
       await login('demo-token-intern', 'alex.rivera@internpilot.ai');
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Login failed.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Login failed.';
+      setError(msg);
     } finally {
       setLoading(false);
     }

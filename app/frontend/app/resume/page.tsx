@@ -5,15 +5,9 @@ import Link from 'next/link';
 import {
   FileText,
   Sparkles,
-  CheckCircle2,
-  AlertCircle,
-  RotateCw,
   ArrowRight,
-  Upload,
   UserCheck,
-  Lightbulb,
-  Layers,
-  Copy
+  Lightbulb
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { resumeApi } from '@/lib/api';
@@ -83,8 +77,9 @@ export default function ResumePage() {
       const result = await resumeApi.analyze(resumeText);
       setAnalysis(result);
       showToast(`Detected ${result.skill_count} technical skills from resume!`, 'success');
-    } catch (err: any) {
-      setError(err.message || 'Failed to analyze resume.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to analyze resume.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -204,7 +199,7 @@ export default function ResumePage() {
               <FileText className="empty-icon" />
               <div className="empty-title">No Resume Analyzed Yet</div>
               <p className="empty-desc">
-                Paste your resume text on the left or select a sample profile, then click "Analyze Resume Text".
+                Paste your resume text on the left or select a sample profile, then click &ldquo;Analyze Resume Text&rdquo;.
               </p>
               <button className="btn btn-primary" onClick={handleAnalyzeResume}>
                 Run Initial Analysis

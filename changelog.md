@@ -634,17 +634,41 @@ All notable changes to InternPilot AI will be documented in this file.
 
 ## 2026-10-10
 
-### Frontend-Backend Integration: Resume Analysis
+### Full-Stack Integration, Reliability, and Hackathon Readiness
 
-- Updated `app/frontend/types/index.ts` so `ResumeAnalysisResponse` uses `skills`, matching the FastAPI backend response.
-- Updated `app/frontend/app/resume/page.tsx` to display the returned skills and apply them to the student profile using `analysis.skills`.
-- Added compatible ESLint dependencies and configuration for the existing Next.js 14 frontend.
-- Updated `app/frontend/types/index.ts` so `ResumeAnalysisResponse` uses `skills`, matching the FastAPI backend response.
-- Repaired the empty root `package.json` with valid minimal JSON.
+#### Schema Alignment & Crash Fixes
+- **Aptitude AI Response**: Aligned frontend `AptitudeAnalysisResponse` type with backend schema (`analysis: string` primary, optional structured fields). Fixed runtime crash on `/aptitude` when rendering AI diagnostic feedback.
+- **Interview AI Evaluation**: Aligned frontend `InterviewEvaluationResponse` with backend schema (`feedback: string` primary, optional structured fields). Fixed runtime crash on `/interview` when evaluating candidate answers.
+- **Resume Analysis**: Confirmed `skills` alignment in `ResumeAnalysisResponse` and `/resume` page, allowing seamless skill extraction and profile updates.
 
+#### API Client & Authentication Hardening
+- **URL Normalization**: Sanitized `API_BASE_URL` in `app/frontend/lib/api.ts` with trailing slash stripping to prevent invalid URL formats (e.g. `http://...//api/...`).
+- **Token Handling**: Removed misleading `'demo-token-intern'` fallback from `getStoredToken()` in `app/frontend/lib/api.ts`. Unauthenticated users now gracefully send unauthenticated requests instead of triggering spurious 401s or false "session expired" notifications on public pages.
+- **Strict Typing**: Eliminated `any` types in `api.ts` and page components, ensuring complete type safety across all frontend service calls.
+- **Navbar Session Awareness**: Updated `Navbar.tsx` to dynamically render user profile and sign-in status based on real authentication state.
 
-### Testing
+#### Database Migration Fix
+- **Migration 004**: Removed duplicate `CHECK (status in ...)` constraint syntax error in `supabase/migrations/004_applications.sql` to ensure repeatable execution in Supabase SQL editor.
+- **Database Documentation**: Added `supabase/README.md` documenting schema overview, foreign keys, RLS policies, and execution instructions.
 
-- TypeScript validation (`npx tsc --noEmit`): **passed**
-- Production build (`npm run build -- --no-lint`): **passed**
-- Standard lint (`npm run lint`): **failed due to lint errors across multiple frontend files; follow-up cleanup required**
+#### Frontend Code Health & Production Build
+- **ESLint Cleanup**: Resolved all ESLint errors and warnings across all 10 frontend pages (`/applications`, `/aptitude`, `/dashboard`, `/internships`, `/interview`, `/learning`, `/login`, `/resume`, `/skill-gap`, `/watchlist`) and components (unused variables, unescaped JSX quotes, missing `useEffect` dependency arrays via `useCallback`).
+- **Production Verification**: Built Next.js 14 production bundle cleanly with standard lint and type checks enabled.
+
+#### Curated Resources Expansion
+- Added curated learning resources for `Python` and `SQL` in `app/backend/app/services/resource_service.py` to support core tech internship searches.
+
+#### Environment & Architecture Documentation
+- Created root `.env.example` and frontend `app/frontend/.env.local.example`.
+- Created comprehensive `Agent.md` documenting OpenAI Agents SDK + Gemini 3.8 Flash architecture.
+- Created `README.md` with complete installation, execution, testing, and demonstration guide.
+- Created `projectcontext.md` with full architectural layout and route mapping.
+
+### Testing & Verification
+- **Live Server Testing**: Verified live FastAPI (`http://127.0.0.1:8000`) and Next.js (`http://localhost:3000`) responding with HTTP 200.
+- **Frontend Page Routes**: Verified all 11 page routes (`/`, `/login`, `/dashboard`, `/internships`, `/resume`, `/skill-gap`, `/learning`, `/aptitude`, `/interview`, `/watchlist`, `/applications`) return HTTP 200.
+- **Live Integration Tests**: Created `app/backend/tests/test_live_api_integration.py` containing 12 live HTTP tests covering root, skill-gap, learning resources, aptitude question retrieval, aptitude submission, resume skill detection, resume analysis, interview questions, and unauthenticated access rejection (401).
+- **Backend Test Suite**: All 121 automated tests passed (`pytest` in `.venv`, 100% pass rate).
+- **Frontend Typecheck**: TypeScript validation passed (`npx tsc --noEmit`) with 0 errors.
+- **Frontend Linting**: Next.js lint passed (`npm run lint`) with 0 warnings and 0 errors.
+- **Frontend Production Build**: Optimized production build passed (`npm run build`) generating 14 static pages.

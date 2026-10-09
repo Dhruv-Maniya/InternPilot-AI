@@ -119,8 +119,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(me);
       setTokenState(authToken);
       await refreshDeadlines();
-    } catch (err: any) {
-      // If 401 or fail, keep mock user for demo fallback or clear
+    } catch {
+      // If demo token, preserve demo session; otherwise clear invalid session
       if (authToken.startsWith('demo')) {
         setUser({ id: 'demo-student-uuid', email: 'demo.student@internpilot.ai' });
         setTokenState(authToken);
@@ -139,13 +139,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (stored) {
       checkUser(stored);
     } else {
-      // Default to demo session for instant hackathon evaluation
-      checkUser('demo-token-intern');
+      setUser(null);
+      setTokenState(null);
+      setLoading(false);
     }
 
     const handleUnauthorized = () => {
       setUser(null);
       setTokenState(null);
+      setStoredToken(null);
       showToast('Your session has expired. Please sign in.', 'error');
     };
 
@@ -164,11 +166,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(me);
       showToast(`Welcome back, ${me.email}!`, 'success');
       await refreshDeadlines();
-    } catch (err: any) {
-      // Fallback for demo tokens
-      const fallbackUser = { id: 'demo-student-uuid', email: email || 'demo.student@internpilot.ai' };
-      setUser(fallbackUser);
-      showToast(`Signed in as ${fallbackUser.email}`, 'success');
+    } catch (err: unknown) {
+      // Support demo candidate token for offline testing/hackathon presentations
+      if (newToken.startsWith('demo')) {
+        const fallbackUser = { id: 'demo-student-uuid', email: email || 'demo.student@internpilot.ai' };
+        setUser(fallbackUser);
+        showToast(`Signed in as ${fallbackUser.email} (Demo Candidate Mode)`, 'success');
+      } else {
+        setStoredToken(null);
+        setTokenState(null);
+        setUser(null);
+        const errorMsg = err instanceof Error ? err.message : 'Invalid or expired authentication token.';
+        showToast(errorMsg, 'error');
+        throw new Error(errorMsg);
+      }
     } finally {
       setLoading(false);
     }

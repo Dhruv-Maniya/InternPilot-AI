@@ -1,24 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   BookOpen,
   ExternalLink,
   Target,
-  Search,
-  Filter,
-  RotateCw,
-  Sparkles,
-  ArrowRight,
-  GraduationCap
+  RotateCw
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { learningApi } from '@/lib/api';
 import { LearningResource } from '@/types';
 
 export default function LearningPage() {
-  const { profile, activeInternship, showToast } = useAuth();
+  const { activeInternship } = useAuth();
 
   // Identified skills to target: from active internship's missing skills or default core skills
   const defaultSkills = activeInternship?.missing_skills?.length
@@ -33,7 +28,7 @@ export default function LearningPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchResources = async (skills = targetSkills) => {
+  const fetchResources = useCallback(async (skills = targetSkills) => {
     if (skills.length === 0) return;
     setLoading(true);
     setError(null);
@@ -44,21 +39,22 @@ export default function LearningPage() {
       } else {
         setResources([]);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load learning resources.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load learning resources.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
-  };
+  }, [targetSkills]);
 
   useEffect(() => {
     if (activeInternship?.missing_skills?.length) {
       setTargetSkills(activeInternship.missing_skills);
       fetchResources(activeInternship.missing_skills);
     } else {
-      fetchResources(targetSkills);
+      fetchResources();
     }
-  }, [activeInternship]);
+  }, [activeInternship, fetchResources]);
 
   const addSkillToQuery = () => {
     const trimmed = customSkillInput.trim();

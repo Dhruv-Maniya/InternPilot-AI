@@ -96,11 +96,11 @@ export interface InterviewEvaluationResponse {
   question: string;
   answer: string;
   feedback: string;
-  strengths: string[];
-  weaknesses: string[];
-  communication: string;
-  relevance: string;
-  suggested_improvement: string;
+  strengths?: string[];
+  weaknesses?: string[];
+  communication?: string;
+  relevance?: string;
+  suggested_improvement?: string;
 }
 
 export interface AptitudeQuestion {
@@ -126,10 +126,11 @@ export interface AptitudeTestResponse {
 }
 
 export interface AptitudeAnalysisResponse {
-  strengths: string[];
-  weak_areas: string[];
-  recommendations: string[];
-  feedback: string;
+  analysis?: string;
+  strengths?: string[];
+  weak_areas?: string[];
+  recommendations?: string[];
+  feedback?: string;
 }
 
 export interface WatchlistItem {

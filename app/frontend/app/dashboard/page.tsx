@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Compass,
@@ -16,8 +16,7 @@ import {
   HelpCircle,
   MessageSquare,
   FileText,
-  RotateCw,
-  ExternalLink,
+  RotateCw
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import {
@@ -26,7 +25,7 @@ import {
   applicationsApi,
   notificationsApi,
 } from '@/lib/api';
-import { MatchedInternship, WatchlistItem, ApplicationItem, DeadlineNotification } from '@/types';
+import { Internship, MatchedInternship, WatchlistItem, ApplicationItem, DeadlineNotification } from '@/types';
 
 export default function DashboardPage() {
   const { profile, activeInternship, setActiveInternship, showToast } = useAuth();
@@ -40,7 +39,7 @@ export default function DashboardPage() {
   const [deadlines, setDeadlines] = useState<DeadlineNotification[]>([]);
   const [savingId, setSavingId] = useState<string | null>(null);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -61,8 +60,13 @@ export default function DashboardPage() {
           const searchRes = await internshipsApi.search('Data Analyst Intern', profile.preferred_location);
           if (searchRes && searchRes.results) {
             setMatchedInternships(
-              searchRes.results.map((i: any) => ({
-                ...i,
+              searchRes.results.map((i: Internship) => ({
+                title: i.title,
+                company: i.company,
+                location: i.location || profile.preferred_location,
+                description: i.description,
+                source: i.source,
+                url: i.url,
                 required_skills: ['Python', 'SQL'],
                 preferred_skills: ['Power BI'],
                 matched_skills: ['Python'],
@@ -75,7 +79,9 @@ export default function DashboardPage() {
               }))
             );
           }
-        } catch {}
+        } catch {
+          // Ignore fallback error
+        }
       }
 
       if (watchlistRes.status === 'fulfilled' && watchlistRes.value.items) {
@@ -89,16 +95,17 @@ export default function DashboardPage() {
       if (deadlinesRes.status === 'fulfilled' && deadlinesRes.value.notifications) {
         setDeadlines(deadlinesRes.value.notifications);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load dashboard metrics.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load dashboard metrics.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
-  };
+  }, [profile]);
 
   useEffect(() => {
     loadDashboardData();
-  }, [profile]);
+  }, [loadDashboardData]);
 
   const handleSaveToWatchlist = async (internship: MatchedInternship) => {
     const id = internship.url || `${internship.company}-${internship.title}`;
@@ -116,8 +123,9 @@ export default function DashboardPage() {
       // Refresh watchlist
       const updated = await watchlistApi.getAll();
       setWatchlist(updated.items);
-    } catch (err: any) {
-      showToast(err.message || 'Could not save to watchlist.', 'error');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Could not save to watchlist.';
+      showToast(msg, 'error');
     } finally {
       setSavingId(null);
     }

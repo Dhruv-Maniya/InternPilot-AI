@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
-  GitCompare,
   Target,
   CheckCircle2,
   AlertTriangle,
@@ -11,9 +10,7 @@ import {
   ArrowRight,
   RotateCw,
   Plus,
-  X,
-  Sparkles,
-  Info
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { learningApi } from '@/lib/api';
@@ -37,7 +34,7 @@ export default function SkillGapPage() {
   const [error, setError] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<SkillGapResponse | null>(null);
 
-  const runSkillGapAnalysis = async (sSkills = studentSkills, rSkills = requiredSkills, pSkills = preferredSkills) => {
+  const runSkillGapAnalysis = useCallback(async (sSkills = studentSkills, rSkills = requiredSkills, pSkills = preferredSkills) => {
     if (sSkills.length === 0 || rSkills.length === 0) {
       showToast('Please provide at least 1 student skill and 1 required skill.', 'error');
       return;
@@ -48,12 +45,13 @@ export default function SkillGapPage() {
     try {
       const result = await learningApi.getSkillGap(sSkills, rSkills, pSkills);
       setAnalysisResult(result);
-    } catch (err: any) {
-      setError(err.message || 'Failed to analyze skill gap.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to analyze skill gap.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
-  };
+  }, [studentSkills, requiredSkills, preferredSkills, showToast]);
 
   useEffect(() => {
     if (activeInternship) {
@@ -70,7 +68,7 @@ export default function SkillGapPage() {
       activeInternship?.required_skills?.length ? activeInternship.required_skills : ['Python', 'SQL', 'Pandas', 'Data Analytics'],
       activeInternship?.preferred_skills?.length ? activeInternship.preferred_skills : ['Power BI', 'Machine Learning']
     );
-  }, [activeInternship, profile.skills]);
+  }, [activeInternship, profile.skills, runSkillGapAnalysis]);
 
   const addStudentSkill = () => {
     const trimmed = newSkillInput.trim();

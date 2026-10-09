@@ -155,26 +155,36 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobile }) => {
             )}
           </div>
 
-          {/* Profile Trigger */}
-          <button
-            onClick={() => setShowProfileModal(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              backgroundColor: '#ffffff',
-              cursor: 'pointer',
-              fontSize: '0.8125rem',
-              fontWeight: 500,
-              color: '#1e293b',
-            }}
-          >
-            <UserCheck size={16} style={{ color: '#2563eb' }} />
-            <span>{profile.name.split(' ')[0]}</span>
-          </button>
+          {/* Profile / Auth Trigger */}
+          {user ? (
+            <button
+              onClick={() => setShowProfileModal(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                backgroundColor: '#ffffff',
+                cursor: 'pointer',
+                fontSize: '0.8125rem',
+                fontWeight: 500,
+                color: '#1e293b',
+              }}
+            >
+              <UserCheck size={16} style={{ color: '#2563eb' }} />
+              <span>{profile.name.split(' ')[0]}</span>
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="btn btn-sm btn-primary"
+              style={{ fontSize: '0.8125rem', textDecoration: 'none' }}
+            >
+              Sign In
+            </Link>
+          )}
         </div>
       </header>
 
@@ -188,6 +198,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobile }) => {
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
+              <div>
+                <label className="label">Account Status</label>
+                <div style={{ fontSize: '0.875rem', fontWeight: 600, color: user ? '#15803d' : '#64748b' }}>
+                  {user ? `Signed In (${user.email})` : 'Guest / Demo Mode'}
+                </div>
+              </div>
+
               <div>
                 <label className="label">Full Name</label>
                 <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1e293b' }}>{profile.name}</div>

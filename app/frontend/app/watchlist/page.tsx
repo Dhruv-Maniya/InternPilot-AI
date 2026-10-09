@@ -7,13 +7,10 @@ import {
   Trash2,
   Target,
   ExternalLink,
-  Plus,
   Briefcase,
   Clock,
   RotateCw,
-  ArrowRight,
-  Compass,
-  CheckCircle2
+  Compass
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { watchlistApi, applicationsApi } from '@/lib/api';
@@ -38,8 +35,9 @@ export default function WatchlistPage() {
       } else {
         setItems([]);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load watchlist.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load watchlist.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -56,8 +54,9 @@ export default function WatchlistPage() {
       setItems((prev) => prev.filter((item) => item.internship_id !== internshipId));
       showToast('Internship removed from watchlist.', 'info');
       refreshDeadlines();
-    } catch (err: any) {
-      showToast(err.message || 'Failed to remove internship.', 'error');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to remove internship.';
+      showToast(msg, 'error');
     } finally {
       setDeletingId(null);
     }
@@ -76,8 +75,9 @@ export default function WatchlistPage() {
         status: 'Applied',
       });
       showToast(`Added "${item.title}" to Applications tracker!`, 'success');
-    } catch (err: any) {
-      showToast(err.message || 'Could not track application.', 'error');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Could not track application.';
+      showToast(msg, 'error');
     } finally {
       setTrackingId(null);
     }

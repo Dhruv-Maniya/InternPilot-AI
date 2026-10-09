@@ -1,21 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import {
   Briefcase,
   Plus,
   Trash2,
-  Edit3,
   ExternalLink,
-  RotateCw,
-  CheckCircle2,
-  Clock,
-  Layers,
   LayoutGrid,
   List,
-  AlertTriangle,
-  ArrowRight
+  AlertTriangle
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { applicationsApi } from '@/lib/api';
@@ -53,8 +46,9 @@ export default function ApplicationsPage() {
       } else {
         setApplications([]);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load applications.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load applications.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -90,8 +84,9 @@ export default function ApplicationsPage() {
       setNewCompany('');
       setNewUrl('');
       setNewStatus('Applied');
-    } catch (err: any) {
-      showToast(err.message || 'Failed to create application.', 'error');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to create application.';
+      showToast(msg, 'error');
     } finally {
       setCreating(false);
     }
@@ -104,8 +99,9 @@ export default function ApplicationsPage() {
         prev.map((app) => (app.application_id === applicationId ? updated : app))
       );
       showToast(`Status updated to "${newStatusVal}"`, 'success');
-    } catch (err: any) {
-      showToast(err.message || 'Failed to update status.', 'error');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update status.';
+      showToast(msg, 'error');
     }
   };
 
@@ -119,8 +115,9 @@ export default function ApplicationsPage() {
       );
       showToast('Application deleted successfully.', 'info');
       setDeleteTarget(null);
-    } catch (err: any) {
-      showToast(err.message || 'Failed to delete application.', 'error');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to delete application.';
+      showToast(msg, 'error');
     } finally {
       setDeleting(false);
     }

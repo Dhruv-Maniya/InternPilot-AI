@@ -1,24 +1,20 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   MessageSquare,
   Sparkles,
-  CheckCircle2,
   AlertTriangle,
   RotateCw,
   ArrowRight,
   Target,
-  Send,
-  HelpCircle,
   Lightbulb,
   ThumbsUp,
   ThumbsDown,
   RefreshCw
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-import { interviewApi } from '@/lib/api';
+import { interviewApi, ApiError } from '@/lib/api';
 import { InterviewQuestion, InterviewEvaluationResponse } from '@/types';
 
 export default function InterviewPage() {
@@ -43,7 +39,7 @@ export default function InterviewPage() {
 
   const [evaluation, setEvaluation] = useState<InterviewEvaluationResponse | null>(null);
 
-  const fetchQuestions = async (targetRole = role, targetType = interviewType) => {
+  const fetchQuestions = useCallback(async (targetRole = role, targetType = interviewType) => {
     setLoadingQuestions(true);
     setError(null);
     setEvaluation(null);
@@ -57,12 +53,13 @@ export default function InterviewPage() {
         setQuestions([]);
         setError('No interview questions found for the selected criteria.');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load interview questions.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load interview questions.';
+      setError(msg);
     } finally {
       setLoadingQuestions(false);
     }
-  };
+  }, [role, interviewType]);
 
   useEffect(() => {
     if (activeInternship) {
@@ -74,7 +71,7 @@ export default function InterviewPage() {
     } else {
       fetchQuestions(role, interviewType);
     }
-  }, [activeInternship]);
+  }, [activeInternship, interviewType, role, fetchQuestions]);
 
   const handleEvaluateAnswer = async () => {
     if (!studentAnswer.trim()) {
@@ -91,11 +88,12 @@ export default function InterviewPage() {
       const res = await interviewApi.evaluate(currQ.question, studentAnswer, role, interviewType);
       setEvaluation(res);
       showToast('Interview response evaluated successfully!', 'success');
-    } catch (err: any) {
-      if (err.status === 503) {
+    } catch (err: unknown) {
+      if (err instanceof ApiError && err.status === 503) {
         setEvalError('Interview AI is temporarily unavailable. Please try again.');
       } else {
-        setEvalError(err.message || 'Failed to evaluate interview answer.');
+        const msg = err instanceof Error ? err.message : 'Failed to evaluate interview answer.';
+        setEvalError(msg);
       }
     } finally {
       setEvaluating(false);
@@ -229,7 +227,7 @@ export default function InterviewPage() {
                 Interviewer Prompt
               </div>
               <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#0f172a', lineHeight: 1.4 }}>
-                "{questions[currentIdx].question}"
+                &ldquo;{questions[currentIdx].question}&rdquo;
               </h3>
             </div>
 
@@ -291,7 +289,9 @@ export default function InterviewPage() {
               <div className="card" style={{ borderLeft: '5px solid #2563eb' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
                   <span className="badge badge-primary">Evaluation Complete</span>
-                  <span className="badge badge-neutral">{evaluation.relevance}</span>
+                  {evaluation.relevance && (
+                    <span className="badge badge-neutral">{evaluation.relevance}</span>
+                  )}
                 </div>
 
                 {/* Overall Feedback */}
@@ -299,48 +299,56 @@ export default function InterviewPage() {
                   <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
                     Evaluator Feedback
                   </div>
-                  <p style={{ fontSize: '0.9375rem', color: '#1e293b', lineHeight: 1.5 }}>
+                  <p style={{ fontSize: '0.9375rem', color: '#1e293b', lineHeight: 1.6, whiteSpace: 'pre-line' }}>
                     {evaluation.feedback}
                   </p>
                 </div>
 
-                {/* Strengths & Weaknesses */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', marginBottom: '18px' }}>
-                  {/* Strengths */}
-                  <div style={{ padding: '12px', backgroundColor: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
-                    <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#15803d', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <ThumbsUp size={14} /> Strengths
-                    </div>
-                    {evaluation.strengths.map((str, i) => (
-                      <div key={i} style={{ fontSize: '0.8125rem', color: '#166534', marginBottom: '4px' }}>
-                        ✓ {str}
+                {/* Strengths & Weaknesses (rendered if structured breakdown available) */}
+                {(evaluation.strengths?.length || evaluation.weaknesses?.length) ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', marginBottom: '18px' }}>
+                    {/* Strengths */}
+                    {evaluation.strengths && evaluation.strengths.length > 0 && (
+                      <div style={{ padding: '12px', backgroundColor: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                        <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#15803d', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <ThumbsUp size={14} /> Strengths
+                        </div>
+                        {evaluation.strengths.map((str, i) => (
+                          <div key={i} style={{ fontSize: '0.8125rem', color: '#166534', marginBottom: '4px' }}>
+                            ✓ {str}
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    )}
 
-                  {/* Weaknesses */}
-                  <div style={{ padding: '12px', backgroundColor: '#fffbeb', borderRadius: '8px', border: '1px solid #fde68a' }}>
-                    <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#b45309', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <ThumbsDown size={14} /> Areas to Polish
-                    </div>
-                    {evaluation.weaknesses.map((w, i) => (
-                      <div key={i} style={{ fontSize: '0.8125rem', color: '#92400e', marginBottom: '4px' }}>
-                        ⚠ {w}
+                    {/* Weaknesses */}
+                    {evaluation.weaknesses && evaluation.weaknesses.length > 0 && (
+                      <div style={{ padding: '12px', backgroundColor: '#fffbeb', borderRadius: '8px', border: '1px solid #fde68a' }}>
+                        <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#b45309', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <ThumbsDown size={14} /> Areas to Polish
+                        </div>
+                        {evaluation.weaknesses.map((w, i) => (
+                          <div key={i} style={{ fontSize: '0.8125rem', color: '#92400e', marginBottom: '4px' }}>
+                            ⚠ {w}
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </div>
-                </div>
+                ) : null}
 
-                {/* Communication & Suggested Improvement */}
-                <div style={{ padding: '14px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Lightbulb size={14} style={{ color: '#2563eb' }} />
-                    Suggested Improvement Strategy:
+                {/* Suggested Improvement */}
+                {evaluation.suggested_improvement && (
+                  <div style={{ padding: '14px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Lightbulb size={14} style={{ color: '#2563eb' }} />
+                      Suggested Improvement Strategy:
+                    </div>
+                    <div style={{ fontSize: '0.8125rem', color: '#475569', lineHeight: 1.4 }}>
+                      {evaluation.suggested_improvement}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.8125rem', color: '#475569', lineHeight: 1.4 }}>
-                    {evaluation.suggested_improvement}
-                  </div>
-                </div>
+                )}
 
                 {/* Next Question Shortcut */}
                 {currentIdx < questions.length - 1 && (

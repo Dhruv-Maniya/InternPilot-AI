@@ -11,6 +11,24 @@ LEARNING_RESOURCES = {
             description="Official documentation for learning and using Pandas."
         )
     ],
+    "python": [
+        LearningResource(
+            skill="Python",
+            title="Official Python Tutorial",
+            resource_type="Documentation",
+            url="https://docs.python.org/3/tutorial/",
+            description="Official tutorial covering core Python language fundamentals."
+        )
+    ],
+    "sql": [
+        LearningResource(
+            skill="SQL",
+            title="PostgreSQL Documentation & Tutorial",
+            resource_type="Tutorial",
+            url="https://www.postgresql.org/docs/current/tutorial.html",
+            description="Comprehensive guide to SQL queries, joins, and relational databases."
+        )
+    ],
     "machine learning": [
         LearningResource(
             skill="Machine Learning",

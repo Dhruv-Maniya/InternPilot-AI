@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Search,
@@ -10,17 +10,13 @@ import {
   Bookmark,
   Target,
   ExternalLink,
-  CheckCircle2,
-  AlertTriangle,
-  RotateCw,
   ArrowRight,
   Briefcase,
-  Layers,
   Info
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { internshipsApi, watchlistApi } from '@/lib/api';
-import { MatchedInternship, WatchlistItem } from '@/types';
+import { Internship, MatchedInternship, WatchlistItem } from '@/types';
 
 export default function InternshipsPage() {
   const { profile, activeInternship, setActiveInternship, showToast } = useAuth();
@@ -39,7 +35,7 @@ export default function InternshipsPage() {
   // Selected for Details Modal
   const [inspectInternship, setInspectInternship] = useState<MatchedInternship | null>(null);
 
-  const fetchMatchedInternships = async () => {
+  const fetchMatchedInternships = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -49,14 +45,15 @@ export default function InternshipsPage() {
       } else {
         setInternships([]);
       }
-    } catch (err: any) {
-      setError(err.message || 'Error running profile matching.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error running profile matching.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
-  };
+  }, [profile]);
 
-  const fetchSearchInternships = async () => {
+  const fetchSearchInternships = useCallback(async () => {
     if (!searchQuery.trim()) return;
     setLoading(true);
     setError(null);
@@ -64,15 +61,15 @@ export default function InternshipsPage() {
       const res = await internshipsApi.search(searchQuery, searchLocation);
       if (res && res.results) {
         // Map search results into normalized MatchedInternship format
-        const mapped: MatchedInternship[] = res.results.map((i: any) => ({
+        const mapped: MatchedInternship[] = res.results.map((i: Internship) => ({
           title: i.title,
           company: i.company,
           location: i.location || searchLocation,
           description: i.description,
           source: i.source,
           url: i.url,
-          required_skills: i.required_skills || ['Python', 'SQL'],
-          preferred_skills: i.preferred_skills || [],
+          required_skills: ['Python', 'SQL'],
+          preferred_skills: [],
           matched_skills: profile.skills.filter((s) => (i.description || '').toLowerCase().includes(s.toLowerCase())),
           missing_skills: ['SQL', 'Pandas'].filter((s) => !profile.skills.includes(s)),
           skills_to_learn: ['SQL'],
@@ -85,19 +82,22 @@ export default function InternshipsPage() {
       } else {
         setInternships([]);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to search internships.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to search internships.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchQuery, searchLocation, profile.skills]);
 
-  const loadWatchlist = async () => {
+  const loadWatchlist = useCallback(async () => {
     try {
       const res = await watchlistApi.getAll();
       if (res && res.items) setWatchlist(res.items);
-    } catch {}
-  };
+    } catch {
+      // Ignore if unauthenticated
+    }
+  }, []);
 
   useEffect(() => {
     loadWatchlist();
@@ -106,7 +106,7 @@ export default function InternshipsPage() {
     } else {
       fetchSearchInternships();
     }
-  }, [mode]);
+  }, [mode, fetchMatchedInternships, fetchSearchInternships, loadWatchlist]);
 
   const handleToggleWatchlist = async (internship: MatchedInternship) => {
     const id = internship.url || `${internship.company}-${internship.title}`;
@@ -130,8 +130,9 @@ export default function InternshipsPage() {
       }
       const updated = await watchlistApi.getAll();
       setWatchlist(updated.items);
-    } catch (err: any) {
-      showToast(err.message || 'Watchlist action failed.', 'error');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Watchlist action failed.';
+      showToast(msg, 'error');
     } finally {
       setSavingId(null);
     }
