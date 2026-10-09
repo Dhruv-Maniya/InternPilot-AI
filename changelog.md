@@ -615,3 +615,19 @@ All notable changes to InternPilot AI will be documented in this file.
 
 - Authentication tests: **2 passed**
 - Full backend test suite: **107 passed**
+
+## 2026-10-09
+
+### Frontend–Backend Integration: CORS Configuration
+
+- Added FastAPI `CORSMiddleware` configuration in `app/backend/app/main.py`.
+- Allowed the local Next.js frontend origins `http://localhost:3000` and `http://127.0.0.1:3000`.
+- Configured cross-origin requests to support credentials, HTTP methods, and request headers.
+- Added `tests/test_cors.py` with tests for an approved frontend origin and an unapproved origin.
+- Verified that the approved origin receives the expected CORS headers.
+- Confirmed that an unapproved origin is not granted CORS access.
+
+### Testing
+
+- Focused CORS tests: **2 passed**
+- Full backend test suite: **109 passed**
