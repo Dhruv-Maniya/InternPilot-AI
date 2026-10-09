@@ -74,7 +74,7 @@ export interface ResumeResponse {
 
 export interface ResumeAnalysisResponse {
   resume_text: string;
-  detected_skills: string[];
+  skills: string[];
   skill_count: number;
   suggestions: string[];
 }

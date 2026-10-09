@@ -631,3 +631,20 @@ All notable changes to InternPilot AI will be documented in this file.
 
 - Focused CORS tests: **2 passed**
 - Full backend test suite: **109 passed**
+
+## 2026-10-10
+
+### Frontend-Backend Integration: Resume Analysis
+
+- Updated `app/frontend/types/index.ts` so `ResumeAnalysisResponse` uses `skills`, matching the FastAPI backend response.
+- Updated `app/frontend/app/resume/page.tsx` to display the returned skills and apply them to the student profile using `analysis.skills`.
+- Added compatible ESLint dependencies and configuration for the existing Next.js 14 frontend.
+- Updated `app/frontend/types/index.ts` so `ResumeAnalysisResponse` uses `skills`, matching the FastAPI backend response.
+- Repaired the empty root `package.json` with valid minimal JSON.
+
+
+### Testing
+
+- TypeScript validation (`npx tsc --noEmit`): **passed**
+- Production build (`npm run build -- --no-lint`): **passed**
+- Standard lint (`npm run lint`): **failed due to lint errors across multiple frontend files; follow-up cleanup required**

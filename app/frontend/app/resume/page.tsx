@@ -91,10 +91,18 @@ export default function ResumePage() {
   };
 
   const handleApplySkillsToProfile = () => {
-    if (!analysis || !analysis.detected_skills) return;
-    const combined = Array.from(new Set([...profile.skills, ...analysis.detected_skills]));
+    if (!analysis || !analysis.skills) return;
+
+    const combined = Array.from(
+      new Set([...profile.skills, ...analysis.skills])
+    );
+
     updateProfile({ skills: combined });
-    showToast(`Updated student profile with ${analysis.detected_skills.length} skills!`, 'success');
+
+    showToast(
+      `Updated student profile with ${analysis.skills.length} skills!`,
+      'success'
+    );
   };
 
   return (
@@ -225,7 +233,7 @@ export default function ResumePage() {
                 </div>
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', margin: '14px 0' }}>
-                  {analysis.detected_skills.map((skill, idx) => (
+                  {analysis.skills.map((skill, idx) => (
                     <span key={idx} className="badge badge-success" style={{ padding: '4px 10px', fontSize: '0.8125rem' }}>
                       ✓ {skill}
                     </span>
