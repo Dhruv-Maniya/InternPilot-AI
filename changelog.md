@@ -690,3 +690,35 @@ All notable changes to InternPilot AI will be documented in this file.
 - **Graceful Fallback**: Added category fallback in `get_questions` so valid questions are reliably returned for any selected assessment configuration.
 - **Test Compatibility**: Preserved backward compatibility for existing test assertions (IDs 1 & 2), ensuring 100% pass rate across the test suite (109 passed).
 
+### Internship Matching API Resolution (`POST /api/internships/match` 500 Fix)
+
+#### Bug & Root Cause
+- **Symptom**: `POST /api/internships/match` failed with `500 Internal Server Error` while `GET /api/watchlist` succeeded with `200 OK`.
+- **Root Causes**:
+  1. **Unguarded Database Upsert & PostgreSQL Cardinality Violation**: In `app/backend/app/services/internship_service.py`, `save_internship_to_supabase()` ran synchronously without error isolation. When duplicate skill requirements were present, Supabase threw PostgreSQL error `21000: ON CONFLICT DO UPDATE command cannot affect row a second time`. Any database network, RLS, or constraint error crashed the entire matching endpoint.
+  2. **SerpApi Null Values & Pydantic Validation Errors**: When Google Jobs via SerpApi returned listings with explicit `null` fields (e.g. `{"title": null}`), `job.get("title", "Unknown")` evaluated to `None`. This caused Pydantic `ValidationError` on the strict `Internship` schema and `AttributeError` in `is_internship()`.
+  3. **SerpApi Error Structure Handling**: SerpApi returns error dictionaries (`{"error": ...}`) rather than Python exceptions upon rate limits or quota exhaustion. These were not converted to typed exceptions, preventing proper HTTP 502 Bad Gateway responses.
+
+#### Fix Implemented
+- **`app/backend/app/services/internship_service.py`**:
+  - Isolated `save_internship_to_supabase()` inside a `try...except` block with structured `logger.warning`. Caching failures in Supabase no longer block student recommendations.
+  - Deduplicated internship requirement rows by `(internship_id, skill, requirement_type)` before upserting, eliminating PostgreSQL cardinality violations.
+  - Added safe string fallbacks (`internship.title or "Unknown"`) preventing null insertions.
+- **`app/backend/app/services/serpapi_service.py`**:
+  - Checked for API-level error responses (`"error" in results`) in `search_jobs()` and raised typed `RuntimeError`.
+  - Added null-safe string handling `(job.get("title") or "").lower()` in `is_internship()`.
+  - Used truthy fallbacks `job.get("title") or "Unknown"` and `job.get("company_name") or "Unknown"` when constructing `Internship` models.
+- **`app/backend/app/api/routes/internships.py`**:
+  - Re-raised existing `HTTPException` directly to preserve standard status codes.
+  - Mapped `RuntimeError` to clean `502 Bad Gateway` error responses.
+  - Sanitized generic `500` error responses and replaced raw debug prints with `logger.exception`.
+
+#### Verification & Test Results
+- **Live Endpoint Verification (`POST /api/internships/match`)**:
+  - Valid profile payload: **200 OK** returning 10 ranked internships with skill match percentages and entry-level eligibility.
+  - Invalid profile payload (empty skills): **422 Unprocessable Entity** as expected.
+  - Existing `/api/watchlist` endpoint: Verified responsive without regression.
+- **Unit & Live Backend Test Suites**:
+  - Executed `pytest` across all test files: **121 passed in 11.38s (100% pass rate)**.
+
+

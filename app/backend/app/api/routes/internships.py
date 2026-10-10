@@ -57,6 +57,9 @@ def search_internships(
             "results": internships
         }
 
+    except HTTPException:
+        raise
+
     except RuntimeError as error:
         logger.exception(
             "SerpApi error while searching internships"
@@ -99,6 +102,9 @@ def get_matched_internships(
             "results": results
         }
 
+    except HTTPException:
+        raise
+
     except RuntimeError as error:
         logger.exception(
             "Runtime error while matching internships"
@@ -110,13 +116,11 @@ def get_matched_internships(
         ) from error
 
     except Exception as error:
-        import traceback
-
-        print("\n========== MATCHING ERROR ==========")
-        traceback.print_exc()
-        print("====================================\n")
+        logger.exception(
+            "Unexpected error while matching internships"
+        )
 
         raise HTTPException(
             status_code=500,
-            detail=str(error)
+            detail="An unexpected error occurred while matching internships."
         ) from error

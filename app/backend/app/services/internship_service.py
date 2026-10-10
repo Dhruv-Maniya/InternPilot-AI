@@ -1,8 +1,11 @@
+import logging
 import re
 
 from app.schemas.internship import StudentProfile
 from app.services.serpapi_service import serpapi_service
 from app.services.supabase_service import supabase_service
+
+logger = logging.getLogger(__name__)
 
 
 # ============================================================
@@ -70,61 +73,79 @@ def save_internship_to_supabase(
     required_skills: list[str],
     preferred_skills: list[str]
 ):
-    if not internship.url:
-        return None
+    try:
+        if not internship or not internship.url:
+            return None
 
-    internship_data = {
-        "title": internship.title,
-        "company": internship.company,
-        "location": internship.location,
-        "description": internship.description,
-        "source": internship.source,
-        "url": internship.url
-    }
+        internship_data = {
+            "title": internship.title or "Unknown",
+            "company": internship.company or "Unknown",
+            "location": internship.location,
+            "description": internship.description,
+            "source": internship.source,
+            "url": internship.url
+        }
 
-    response = (
-        supabase_service.admin_client
-        .table("internships")
-        .upsert(
-            internship_data,
-            on_conflict="url"
-        )
-        .execute()
-    )
-
-    if not response.data:
-        return None
-
-    internship_id = response.data[0]["id"]
-
-    requirements = []
-
-    for skill in required_skills:
-        requirements.append({
-            "internship_id": internship_id,
-            "skill": skill,
-            "requirement_type": "required"
-        })
-
-    for skill in preferred_skills:
-        requirements.append({
-            "internship_id": internship_id,
-            "skill": skill,
-            "requirement_type": "preferred"
-        })
-
-    if requirements:
-        (
+        response = (
             supabase_service.admin_client
-            .table("internship_requirements")
+            .table("internships")
             .upsert(
-                requirements,
-                on_conflict="internship_id,skill,requirement_type"
+                internship_data,
+                on_conflict="url"
             )
             .execute()
         )
 
-    return internship_id
+        if not response.data:
+            return None
+
+        internship_id = response.data[0].get("id")
+        if not internship_id:
+            return None
+
+        requirements = []
+
+        for skill in set(required_skills or []):
+            if skill:
+                requirements.append({
+                    "internship_id": internship_id,
+                    "skill": skill,
+                    "requirement_type": "required"
+                })
+
+        for skill in set(preferred_skills or []):
+            if skill:
+                requirements.append({
+                    "internship_id": internship_id,
+                    "skill": skill,
+                    "requirement_type": "preferred"
+                })
+
+        if requirements:
+            # Deduplicate by (internship_id, skill, requirement_type)
+            unique_reqs = list({
+                (r["internship_id"], r["skill"], r["requirement_type"]): r
+                for r in requirements
+            }.values())
+
+            (
+                supabase_service.admin_client
+                .table("internship_requirements")
+                .upsert(
+                    unique_reqs,
+                    on_conflict="internship_id,skill,requirement_type"
+                )
+                .execute()
+            )
+
+        return internship_id
+
+    except Exception as error:
+        logger.warning(
+            "Failed to save internship to Supabase: %s",
+            error
+        )
+        return None
 
 # ============================================================
 # 2. TEXT NORMALIZATION

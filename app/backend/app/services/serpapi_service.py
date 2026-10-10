@@ -30,6 +30,11 @@ class SerpApiService:
             search = GoogleSearch(params)
             results = search.get_dict()
 
+            if isinstance(results, dict) and "error" in results:
+                raise RuntimeError(
+                    f"SerpApi error: {results['error']}"
+                )
+
             return results
 
         except Exception as error:
@@ -40,8 +45,8 @@ class SerpApiService:
     def is_internship(self, job: dict) -> bool:
         """Check whether a listing appears to be an internship."""
 
-        title = job.get("title", "").lower()
-        description = job.get("description", "").lower()
+        title = (job.get("title") or "").lower()
+        description = (job.get("description") or "").lower()
 
         excluded_titles = [
             "senior",
@@ -103,6 +108,9 @@ class SerpApiService:
 
         results = self.search_jobs(query, location)
 
+        if not isinstance(results, dict):
+            return []
+
         internships = []
 
         preferred_location = (
@@ -112,14 +120,18 @@ class SerpApiService:
         # Track unique company-title combinations
         seen_internships = set()
 
-        for job in results.get("jobs_results", []):
+        jobs_results = results.get("jobs_results") or []
+
+        for job in jobs_results:
+            if not isinstance(job, dict):
+                continue
 
             if not self.is_internship(job):
                 continue
 
             internship = Internship(
-                title=job.get("title", "Unknown"),
-                company=job.get("company_name", "Unknown"),
+                title=job.get("title") or "Unknown",
+                company=job.get("company_name") or "Unknown",
                 location=job.get("location"),
                 description=job.get("description"),
                 source=job.get("via"),
