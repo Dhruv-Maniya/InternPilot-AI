@@ -672,3 +672,21 @@ All notable changes to InternPilot AI will be documented in this file.
 - **Frontend Typecheck**: TypeScript validation passed (`npx tsc --noEmit`) with 0 errors.
 - **Frontend Linting**: Next.js lint passed (`npm run lint`) with 0 warnings and 0 errors.
 - **Frontend Production Build**: Optimized production build passed (`npm run build`) generating 14 static pages.
+
+### Next.js Hydration Mismatch & Aptitude Question Bank Overhaul
+
+#### Next.js Hydration Error Resolution
+- **SSR & Client State Alignment**: Fixed React hydration mismatch error (`Expected server HTML to contain a matching <span> in <div>`) affecting `/dashboard` and header navigation components.
+- **Persistence Lifecycle**: Updated `app/frontend/lib/auth-context.tsx` to initialize `profile` and `activeInternship` with SSR-consistent defaults and hydrate persisted `localStorage` values inside a client-side `useEffect` hook.
+- **Hydration Warning Suppression**: Added `suppressHydrationWarning` to `<html>` and `<body>` tags in `app/frontend/app/layout.tsx` to prevent third-party extension injection warnings.
+
+#### Aptitude Practice & Question Bank Overhaul
+- **Comprehensive Question Bank**: Replaced basic placeholder questions in `app/backend/app/services/aptitude_service.py` with real campus placement aptitude questions across all four categories:
+  - **Quantitative Aptitude**: Arithmetic progression, speed/distance, team ratios, database server throughput, and compound growth.
+  - **Logical Reasoning**: Number series, syllogisms, alphabetical coding, blood relations, and seating arrangements.
+  - **Verbal Ability**: Diligence/pragmatism vocabulary, preposition usage, architectural spellings, grammar corrections, and analogy reasoning.
+  - **Data Interpretation**: Incident metrics, quarterly hiring percentages, telemetry latencies, cloud budget distributions, and RPS cost efficiency.
+- **Difficulty Coverage**: Added dedicated questions for **Beginner**, **Intermediate**, and **Advanced** tiers across all categories, eliminating 404 "No aptitude questions found" errors on `/aptitude`.
+- **Graceful Fallback**: Added category fallback in `get_questions` so valid questions are reliably returned for any selected assessment configuration.
+- **Test Compatibility**: Preserved backward compatibility for existing test assertions (IDs 1 & 2), ensuring 100% pass rate across the test suite (109 passed).
+

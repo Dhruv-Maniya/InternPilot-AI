@@ -41,29 +41,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setTokenState] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [profile, setProfile] = useState<StudentProfile>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('internpilot_student_profile');
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch {}
-      }
-    }
-    return DEFAULT_PROFILE;
-  });
+  const [profile, setProfile] = useState<StudentProfile>(DEFAULT_PROFILE);
+  const [activeInternship, setActiveInternshipState] = useState<MatchedInternship | null>(null);
 
-  const [activeInternship, setActiveInternshipState] = useState<MatchedInternship | null>(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('internpilot_active_internship');
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch {}
-      }
+      try {
+        const savedProfile = localStorage.getItem('internpilot_student_profile');
+        if (savedProfile) {
+          setProfile(JSON.parse(savedProfile));
+        }
+      } catch {}
+
+      try {
+        const savedActive = localStorage.getItem('internpilot_active_internship');
+        if (savedActive) {
+          setActiveInternshipState(JSON.parse(savedActive));
+        }
+      } catch {}
     }
-    return null;
-  });
+  }, []);
 
   const [deadlines, setDeadlines] = useState<DeadlineNotification[]>([]);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
